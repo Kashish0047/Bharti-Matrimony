@@ -1,7 +1,7 @@
 import FriendRequest from "../models/friendRequest.model.js";
 import User from "../models/user.model.js";
 import Profile from "../models/profile.model.js";
-import Subscription from "../models/Payment.model.js";
+import Subscription from "../models/payment.model.js";
 
 const sendFriendRequest = async (req, res) => {
   try {
