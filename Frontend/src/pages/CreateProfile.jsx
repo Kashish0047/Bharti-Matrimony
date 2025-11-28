@@ -15,15 +15,19 @@ function CreateProfile() {
     return localStorage.getItem("profileImagePreview") || null;
   });
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
   const [additionalPhotos, setAdditionalPhotos] = useState([]);
-  const [additionalPhotosPreviews, setAdditionalPhotosPreviews] = useState(() => {
-    try {
-      const saved = localStorage.getItem("additionalPhotosPreviews");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
+  const [additionalPhotosPreviews, setAdditionalPhotosPreviews] = useState(
+    () => {
+      try {
+        const saved = localStorage.getItem("additionalPhotosPreviews");
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
     }
-  });
+  );
   const [uploadingPhotos, setUploadingPhotos] = useState(false);
 
   const [formData, setFormData] = useState(() => {
@@ -322,16 +326,12 @@ function CreateProfile() {
         toast.error("Please login to create a profile");
         return;
       }
-      await axios.post(
-        "http://localhost:5000/api/profiles/create",
-        formDataToSend,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          timeout: 60000,
-        }
-      );
+      await axios.post(`${API_URL}/profiles/create`, formDataToSend, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        timeout: 60000,
+      });
       localStorage.removeItem("profileFormData");
       localStorage.removeItem("profileFormStep");
       localStorage.removeItem("profileImagePreview");

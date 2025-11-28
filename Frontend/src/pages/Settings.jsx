@@ -28,7 +28,7 @@ function Settings() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
-  const API_URL = "http://localhost:5000/api";
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     fetchUserData();

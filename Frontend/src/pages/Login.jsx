@@ -15,6 +15,8 @@ function Login() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
+  const API_URL = process.env.REACT_APP_API_URL;
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -60,7 +62,7 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/users/login",
+        `${API_URL}/users/login`,
         {
           email: formData.Email,
           password: formData.Password,

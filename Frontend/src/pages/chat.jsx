@@ -8,8 +8,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CallModal from "./CallModal";
 
-const SOCKET_URL = "http://localhost:5000";
-const API_URL = "http://localhost:5000/api";
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
+const API_URL = process.env.REACT_APP_API_URL;
 
 const EMOJI_CATEGORIES = {
   smileys: [
@@ -455,22 +455,22 @@ function Chat() {
               <div key={index} className="relative">
                 {media.fileType?.startsWith("image/") ? (
                   <img
-                    src={`http://localhost:5000${media.url}`}
+                    src={`${SOCKET_URL}${media.url}`}
                     alt="Shared image"
                     className="max-w-full h-auto rounded-2xl max-h-80 object-cover cursor-pointer hover:opacity-90 transition-opacity"
                     onClick={() =>
-                      window.open(`http://localhost:5000${media.url}`, "_blank")
+                      window.open(`${SOCKET_URL}${media.url}`, "_blank")
                     }
                   />
                 ) : media.fileType?.startsWith("video/") ? (
                   <video
-                    src={`http://localhost:5000${media.url}`}
+                    src={`${SOCKET_URL}${media.url}`}
                     controls
                     className="max-w-full h-auto rounded-2xl max-h-80"
                   />
                 ) : media.fileType?.startsWith("audio/") ? (
                   <audio
-                    src={`http://localhost:5000${media.url}`}
+                    src={`${SOCKET_URL}${media.url}`}
                     controls
                     className="w-full max-w-sm"
                   />
@@ -478,7 +478,7 @@ function Chat() {
                   <div
                     className="flex items-center gap-3 p-3 bg-black/20 rounded-xl cursor-pointer hover:bg-black/30 transition-colors"
                     onClick={() =>
-                      window.open(`http://localhost:5000${media.url}`, "_blank")
+                      window.open(`${SOCKET_URL}${media.url}`, "_blank")
                     }
                   >
                     <svg

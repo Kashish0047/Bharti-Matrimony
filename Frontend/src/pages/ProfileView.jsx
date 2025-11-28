@@ -18,7 +18,7 @@ function ProfileView() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
 
-  const API_URL = "http://localhost:5000/api";
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     fetchProfileData();

@@ -13,14 +13,14 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
-  
+  const API_URL = process.env.REACT_APP_API_URL;
+
   const [selectedDurations, setSelectedDurations] = useState({
     Basic: "1M",
-    Gold: "3M", 
+    Gold: "3M",
     Premium: "1M",
   });
 
-  
   const [contactData, setContactData] = useState({
     name: "",
     email: "",
@@ -29,7 +29,6 @@ export default function Home() {
   });
   const [contactLoading, setContactLoading] = useState(false);
 
-  
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -128,7 +127,6 @@ export default function Home() {
     },
   ];
 
-  
   const handleDurationChange = (planName, duration) => {
     setSelectedDurations((prev) => ({
       ...prev,
@@ -136,7 +134,6 @@ export default function Home() {
     }));
   };
 
- 
   const getCurrentPlanDetails = (plan) => {
     const selectedDuration = selectedDurations[plan.name];
     return {
@@ -166,7 +163,7 @@ export default function Home() {
       const planDetails = getCurrentPlanDetails(plan);
 
       const orderResponse = await axios.post(
-        "http://localhost:5000/api/payments/create-order",
+        `${API_URL}/payments/create-order`,
         {
           planName: planDetails.planName,
           planPrice: planDetails.price,
@@ -191,7 +188,7 @@ export default function Home() {
         handler: async function (response) {
           try {
             const verifyResponse = await axios.post(
-              "http://localhost:5000/api/payments/verify",
+              `${API_URL}/payments/verify`,
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
@@ -246,12 +243,11 @@ export default function Home() {
     }
   };
 
- 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setContactLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/contact", contactData);
+      await axios.post(`${API_URL}/contact`, contactData);
       toast.success("Your query has been sent!");
       setContactData({ name: "", email: "", phone: "", message: "" });
     } catch (err) {
@@ -264,7 +260,6 @@ export default function Home() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "a") {
         navigate("/admin");
       }
@@ -278,7 +273,6 @@ export default function Home() {
       <ToastContainer position="top-right" autoClose={3000} />
       <Navbar />
 
-     
       <header
         id="hero"
         className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden"
@@ -357,7 +351,6 @@ export default function Home() {
         </div>
       </header>
 
-      
       <section
         id="packages"
         className="max-w-7xl mx-auto px-6 py-24 bg-gradient-to-br from-slate-50 to-slate-100"
@@ -394,7 +387,6 @@ export default function Home() {
                   </div>
                 )}
 
-                
                 <div className="mb-6 text-center">
                   <div className="text-2xl font-bold text-slate-800 mb-2">
                     {plan.badge} Plan
@@ -462,7 +454,6 @@ export default function Home() {
                   </ul>
                 </div>
 
-              
                 {plan.limitations && (
                   <div className="mb-6">
                     <div className="font-semibold text-red-600 mb-2">
@@ -492,7 +483,6 @@ export default function Home() {
                   </div>
                 )}
 
-          
                 <button
                   onClick={() => handleBuyPlan(plan)}
                   disabled={loading || !razorpayLoaded}
@@ -517,7 +507,6 @@ export default function Home() {
           })}
         </div>
 
-        
         <div className="mt-16">
           <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 max-w-5xl mx-auto">
             <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
@@ -577,7 +566,6 @@ export default function Home() {
         </div>
       </section>
 
-    
       <section
         id="stories"
         className="bg-gradient-to-br from-slate-100 to-slate-50 py-24"

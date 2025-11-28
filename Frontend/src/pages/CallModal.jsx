@@ -35,7 +35,12 @@ function CallModal({
         } else {
           if (localAudioRef.current) localAudioRef.current.srcObject = stream;
         }
-        peerRef.current = new RTCPeerConnection();
+        peerRef.current = new RTCPeerConnection({
+          iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            
+          ],
+        });
         stream
           .getTracks()
           .forEach((track) => peerRef.current.addTrack(track, stream));
@@ -126,7 +131,12 @@ function CallModal({
     } else {
       if (localAudioRef.current) localAudioRef.current.srcObject = stream;
     }
-    peerRef.current = new RTCPeerConnection();
+    peerRef.current = new RTCPeerConnection({
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        // Add TURN servers here if needed
+      ],
+    });
     stream
       .getTracks()
       .forEach((track) => peerRef.current.addTrack(track, stream));
