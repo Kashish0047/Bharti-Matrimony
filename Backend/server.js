@@ -23,10 +23,10 @@ const app = express();
 const server = createServer(app);
 
 const allowedOrigins = [
-  "http://localhost:3000",
+  "http://localhost:5000",
   "http://localhost:5173",
   "https://bharti-matrimony.onrender.com", 
-  "https://bharti-matrimony.vercel.app " 
+  "https://bharti-matrimony.vercel.app" 
 ];  
 
 const io = new Server(server, {
