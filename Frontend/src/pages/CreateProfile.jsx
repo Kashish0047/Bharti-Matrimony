@@ -15,7 +15,7 @@ function CreateProfile() {
     return localStorage.getItem("profileImagePreview") || null;
   });
 
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
   const [additionalPhotos, setAdditionalPhotos] = useState([]);
   const [additionalPhotosPreviews, setAdditionalPhotosPreviews] = useState(

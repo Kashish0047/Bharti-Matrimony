@@ -8,8 +8,8 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CallModal from "./CallModal";
 
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
-const API_URL = process.env.REACT_APP_API_URL;
+const SOCKET_URL = import.meta.env.VITE_REACT_APP_SOCKET_URL;
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 const EMOJI_CATEGORIES = {
   smileys: [

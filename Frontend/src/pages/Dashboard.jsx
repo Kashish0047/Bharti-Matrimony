@@ -48,7 +48,7 @@ function Dashboard() {
     income: "",
   });
 
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
   useEffect(() => {
     fetchDashboardData();

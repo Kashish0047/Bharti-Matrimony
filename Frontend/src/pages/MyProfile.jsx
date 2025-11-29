@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { FaLock } from "react-icons/fa"; 
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
 function MyProfile() {
   const navigate = useNavigate();

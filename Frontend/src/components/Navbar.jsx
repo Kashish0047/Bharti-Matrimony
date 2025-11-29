@@ -10,7 +10,7 @@ function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
 
-  const API_URL = process.env.REACT_APP_API_URL;
+  const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
   const loadUserData = () => {
     const token = localStorage.getItem("token");
