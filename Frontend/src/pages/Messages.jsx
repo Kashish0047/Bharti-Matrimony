@@ -70,6 +70,7 @@ function Messages() {
       uniqueUsers[otherUserId] = {
         ...otherUser,
         lastMessage: chat.lastMessage,
+        chatId: chat._id,
         _id: otherUserId,
       };
     }
@@ -96,26 +97,28 @@ const getProfileImage = (pic) => {
     });
   };
 
-  const handleDeleteChat = async (otherUserId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`${API_URL}/chat/delete-chat/${otherUserId}`, config);
-      toast.success("Chat deleted!");
-      if (selectedUser && getUserId(selectedUser) === otherUserId) {
-        setSelectedUser(null);
-        setMessages([]);
-      }
-      const updatedChats = chats.filter(
-        (chat) => getUserId(chat.lastMessage?.otherUser) !== otherUserId
-      );
-      setChats(updatedChats);
-      setShowDeleteConfirm(null);
-    } catch (error) {
-      console.error("Error deleting chat:", error);
-      toast.error("Failed to delete chat");
+  const handleDeleteChat = async (chatId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const config = { headers: { Authorization: `Bearer ${token}` } };
+
+    await axios.delete(`${API_URL}/chat/delete-chat/${chatId}`, config);
+
+    toast.success("Chat deleted!");
+
+    setChats((prev) => prev.filter((chat) => chat._id !== chatId));
+
+    if (selectedUser) {
+      setSelectedUser(null);
+      setMessages([]);
     }
-  };
+
+    setShowDeleteConfirm(null);
+  } catch (error) {
+    console.error("Error deleting chat:", error);
+    toast.error("Failed to delete chat");
+  }
+};
 
 
   return (
@@ -173,7 +176,7 @@ const getProfileImage = (pic) => {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowDeleteConfirm(getUserId(otherUser));
+                    setShowDeleteConfirm(getUserId(otherUser.chatId));
                   }}
                   className="text-xs text-red-400 hover:text-red-600 transition"
                   title="Delete chat"
