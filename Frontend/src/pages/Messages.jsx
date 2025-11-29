@@ -76,7 +76,17 @@ function Messages() {
   });
 
 
+const getProfileImage = (pic) => {
+  if (!pic) return null;
 
+  const baseURL = API_URL.replace("/api", "");
+
+  if (pic.startsWith("http")) return pic;
+
+  if (pic.startsWith("/uploads/")) return `${baseURL}${pic}`;
+
+  return `${baseURL}/uploads/${pic}`;
+};
 
   const handleUserClick = (otherUser) => {
     // Always use the userId (not profileId) for chat route
@@ -126,7 +136,7 @@ function Messages() {
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-2xl overflow-hidden">
                 {otherUser.profilePic ? (
                   <img
-                    src={`http://localhost:5000${otherUser.profilePic}`}
+                    src={getProfileImage(otherUser.profilePic)}
                     alt={otherUser.name}
                     className="w-full h-full object-cover rounded-full"
                   />
