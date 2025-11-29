@@ -361,17 +361,20 @@ function Dashboard() {
   };
 
   const getMyProfileImage = (profile) => {
+
+     const baseURL = API_URL.replace("/api", "");
+
     if (profile?.profilePic) {
       const url = profile.profilePic.startsWith("/uploads/")
-        ? `http://localhost:5000${profile.profilePic}`
-        : `http://localhost:5000/${profile.profilePic}`;
+        ? `${baseURL}${profile.profilePic}`
+        : `${baseURL}/uploads/${profile.profilePic}`;
       return url;
     }
 
     if (profile?.additionalPhotos && profile.additionalPhotos.length > 0) {
       const url = profile.additionalPhotos[0].startsWith("/uploads/")
-        ? `http://localhost:5000${profile.additionalPhotos[0]}`
-        : `http://localhost:5000/${profile.additionalPhotos[0]}`;
+        ? `${baseURL}${profile.additionalPhotos[0]}`
+        : `${baseURL}/uploads/${profile.additionalPhotos[0]}`;
       return url;
     }
 
@@ -381,22 +384,18 @@ function Dashboard() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
 
+    const baseURL = API_URL.replace("/api", "");
+
     if (imagePath.startsWith("http")) {
       return imagePath;
     }
 
     if (imagePath.startsWith("/uploads/")) {
-      const url = `http://localhost:5000${imagePath}`;
-      return url;
+      return `${baseURL}${imagePath}`;
     }
 
-    if (!imagePath.startsWith("/")) {
-      const url = `http://localhost:5000/uploads/${imagePath}`;
-      return url;
-    }
 
-    const url = `http://localhost:5000${imagePath}`;
-    return url;
+    return `${baseURL}/uploads/${imagePath}`;
   };
 
   useEffect(() => {
