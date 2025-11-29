@@ -205,21 +205,22 @@ function ProfileView() {
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
 
+    const baseURL = API_URL.replace("/api", "");
 
     if (imagePath.startsWith("http")) return imagePath;
 
 
     if (imagePath.startsWith("/uploads/")) {
-      return `http://localhost:5000${imagePath}`;
+      return `${baseURL}${imagePath}`;
     }
 
    
     if (!imagePath.startsWith("/")) {
-      return `http://localhost:5000/uploads/${imagePath}`;
+      return `${baseURL}/uploads/${imagePath}`;
     }
 
     
-    return `http://localhost:5000${imagePath}`;
+    return `${baseURL}/uploads/${imagePath}`;
   };
 
   if (loading) {

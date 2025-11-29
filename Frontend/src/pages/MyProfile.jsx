@@ -54,9 +54,10 @@ function MyProfile() {
         setFormData(profileRes.data.profile);
 
         const profilePic = profileRes.data.profile.profilePic;
+        const baseURL = API_URL.replace("/api", "");
         if (profilePic) {
           const imageUrl = profilePic.startsWith("/uploads/")
-            ? `http://localhost:5000${profilePic}`
+            ? `${baseURL}${profilePic}`
             : profilePic;
           setProfilePicPreview(imageUrl);
           console.log("🖼️ Profile pic URL:", imageUrl);
@@ -66,8 +67,8 @@ function MyProfile() {
         const additionalPhotos = profileRes.data.profile.additionalPhotos || [];
         const additionalPhotoUrls = additionalPhotos.map((photo) =>
           photo.startsWith("/uploads/")
-            ? `http://localhost:5000${photo}`
-            : `http://localhost:5000/${photo}`
+            ? `${baseURL}${photo}`
+            : `${baseURL}${photo}`
         );
         setAdditionalPhotosPreview(additionalPhotoUrls);
         console.log("📸 Additional photos:", additionalPhotoUrls);
