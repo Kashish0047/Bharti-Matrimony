@@ -8,6 +8,7 @@ function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
 
   const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
@@ -41,12 +42,11 @@ function Navbar() {
       }
     };
 
-    window.addEventListener("storage", handleStorageChange);
-
     const handleUserUpdate = () => {
       loadUserData();
     };
 
+    window.addEventListener("storage", handleStorageChange);
     window.addEventListener("userDataUpdated", handleUserUpdate);
 
     return () => {
@@ -77,13 +77,13 @@ function Navbar() {
     setIsLoggedIn(false);
     setUser(null);
     setDropdownOpen(false);
+    setMobileMenuOpen(false);
 
     navigate("/");
   };
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
+  const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -96,55 +96,52 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [dropdownOpen]);
 
- 
-
   useEffect(() => {
-    const handleFocus = () => {
-      loadUserData();
-    };
-
+    const handleFocus = () => loadUserData();
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, []);
 
   return (
     <nav className="w-full bg-slate-900/95 backdrop-blur-md shadow-xl border-b border-slate-800 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16 sm:h-20">
+          {/* Logo */}
           <div className="flex items-center">
             <Link
               to="/"
-              className="logo text-2xl font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent"
+              className="logo text-xl sm:text-2xl font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent"
             >
               Bharti Matrimony
             </Link>
           </div>
 
+          {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-1">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200"
             >
               Home
-            </a>
-            <a
-              href="/#packages"
+            </Link>
+            <Link
+              to="/#packages"
               className="px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200"
             >
               Packages
-            </a>
-            <a
-              href="/#stories"
+            </Link>
+            <Link
+              to="/#stories"
               className="px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200"
             >
               Success Stories
-            </a>
-            <a
-              href="/#contact"
+            </Link>
+            <Link
+              to="/#contact"
               className="px-5 py-2.5 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all duration-200"
             >
               Contact
-            </a>
+            </Link>
 
             {!isLoggedIn ? (
               <Link
@@ -199,22 +196,7 @@ function Navbar() {
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <svg
-                          className="w-5 h-5 text-slate-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                          />
-                        </svg>
-                        <span className="text-sm font-medium text-slate-700">
-                          Dashboard
-                        </span>
+                        Dashboard
                       </Link>
 
                       <Link
@@ -222,102 +204,35 @@ function Navbar() {
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <svg
-                          className="w-5 h-5 text-slate-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
-                        </svg>
-                        <span className="text-sm font-medium text-slate-700">
-                          My Profile
-                        </span>
+                        My Profile
                       </Link>
 
                       {subscription && (
-                        <Link
-                          to="/create-profile"
-                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
-                          onClick={() => setDropdownOpen(false)}
-                        >
-                          <svg
-                            className="w-5 h-5 text-slate-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                            />
-                          </svg>
-                          <span className="text-sm font-medium text-slate-700">
-                            Create Profile
-                          </span>
-                        </Link>
-                      )}
-                      
-                      {subscription && (
+                        <>
                           <Link
-                        to="/messages"
-                        className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
-                        onClick={() => setDropdownOpen(false)}
-                      >
-                        <svg
-                          className="w-5 h-5 text-slate-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                          />
-                        </svg>
-                        <span className="text-sm font-medium text-slate-700">
-                          Messages
-                        </span>
-                      </Link>
+                            to="/create-profile"
+                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            Create Profile
+                          </Link>
+
+                          <Link
+                            to="/messages"
+                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
+                            onClick={() => setDropdownOpen(false)}
+                          >
+                            Messages
+                          </Link>
+                        </>
                       )}
-                    
 
                       <Link
                         to="/settings"
                         className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <svg
-                          className="w-5 h-5 text-slate-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                        <span className="text-sm font-medium text-slate-700">
-                          Settings
-                        </span>
+                        Settings
                       </Link>
                     </div>
 
@@ -326,22 +241,7 @@ function Navbar() {
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-2.5 w-full hover:bg-red-50 transition-all"
                       >
-                        <svg
-                          className="w-5 h-5 text-red-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
-                        <span className="text-sm font-medium text-red-600">
-                          Logout
-                        </span>
+                        Logout
                       </button>
                     </div>
                   </div>
@@ -350,10 +250,20 @@ function Navbar() {
             )}
           </div>
 
-          <div className="md:hidden">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center gap-2">
+            {!isLoggedIn && (
+              <Link
+                to="/signup"
+                className="px-4 py-2 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:shadow-lg transition-all duration-300"
+              >
+                Login
+              </Link>
+            )}
             <button
+              onClick={toggleMobileMenu}
               className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
-              aria-label="Open menu"
+              aria-label="Toggle menu"
             >
               <svg
                 className="w-6 h-6"
@@ -361,16 +271,128 @@ function Navbar() {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 8h16M4 16h16"
-                ></path>
+                {mobileMenuOpen ? (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                ) : (
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 8h16M4 16h16"
+                  />
+                )}
               </svg>
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-800 py-4 space-y-2">
+            <Link
+              to="/"
+              className="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              to="/#packages"
+              className="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Packages
+            </Link>
+            <Link
+              to="/#stories"
+              className="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Success Stories
+            </Link>
+            <Link
+              to="/#contact"
+              className="block px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Contact
+            </Link>
+
+            {isLoggedIn && (
+              <>
+                <div className="border-t border-slate-800 pt-4 mt-4">
+                  <div className="px-4 py-2 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center text-white font-bold">
+                      {user?.name?.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-white">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  to="/dashboard"
+                  className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/my-profile"
+                  className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  My Profile
+                </Link>
+
+                {subscription && (
+                  <>
+                    <Link
+                      to="/create-profile"
+                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Create Profile
+                    </Link>
+                    <Link
+                      to="/messages"
+                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Messages
+                    </Link>
+                  </>
+                )}
+
+                <Link
+                  to="/settings"
+                  className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Settings
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-3 px-4 py-2 w-full text-sm font-medium text-red-400 hover:text-red-500 hover:bg-red-900/20 rounded-lg transition-all"
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </nav>
   );
