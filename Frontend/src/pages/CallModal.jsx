@@ -21,7 +21,6 @@ function CallModal({
     !isCaller && !!incomingOffer
   );
 
-
   useEffect(() => {
     let stream;
 
@@ -37,10 +36,7 @@ function CallModal({
           if (localAudioRef.current) localAudioRef.current.srcObject = stream;
         }
         peerRef.current = new RTCPeerConnection({
-          iceServers: [
-            { urls: "stun:stun.l.google.com:19302" },
-            
-          ],
+          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
         });
         stream
           .getTracks()
@@ -133,10 +129,7 @@ function CallModal({
       if (localAudioRef.current) localAudioRef.current.srcObject = stream;
     }
     peerRef.current = new RTCPeerConnection({
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        // Add TURN servers here if needed
-      ],
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
     stream
       .getTracks()
@@ -199,28 +192,74 @@ function CallModal({
     }
   };
 
+  // ✅ Helper functions for image handling
   const BASE_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "";
 
   const getImageUrl = (imagePath) => {
-  if (!imagePath) return "/default-avatar.png";
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http")) return imagePath;
+    if (imagePath.startsWith("/uploads/")) {
+      return `${BASE_URL}${imagePath}`;
+    }
+    return `${BASE_URL}/uploads/profiles/${imagePath}`;
+  };
 
-  
-  if (imagePath.startsWith("http")) return imagePath;
+  const getProfileImage = () => {
+    if (friend?.profilePic) {
+      const url = getImageUrl(friend.profilePic);
+      if (url) return url;
+    }
+    if (friend?.additionalPhotos && friend.additionalPhotos.length > 0) {
+      const url = getImageUrl(friend.additionalPhotos[0]);
+      if (url) return url;
+    }
+    return null;
+  };
 
- 
-  if (!imagePath.startsWith("/")) {
-    imagePath = `/uploads/${imagePath}`;
-  }
+  const getInitials = (name) => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
-  return `${BASE_URL}${imagePath}`;
-};
+  const profileImage = getProfileImage();
 
-  const profileImage =
-  friend?.profilePic && getImageUrl(friend.profilePic) !== "/default-avatar.png"
-    ? getImageUrl(friend.profilePic)
-    : (friend?.additionalPhotos?.length > 0
-        ? getImageUrl(friend.additionalPhotos[0])
-        : "/default-avatar.png");
+  // ✅ Profile Image Component with Fallback
+  const ProfileAvatar = ({ size = "w-24 h-24", showStatus = false }) => (
+    <div className={`relative ${size}`}>
+      <div
+        className={`${size} rounded-full border-4 border-amber-400 shadow-lg overflow-hidden`}
+      >
+        {profileImage ? (
+          <img
+            src={profileImage}
+            alt={friend?.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.target.style.display = "none";
+              e.target.nextElementSibling.style.display = "flex";
+            }}
+          />
+        ) : null}
+        <div
+          className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-400 flex items-center justify-center text-white font-bold"
+          style={{
+            display: profileImage ? "none" : "flex",
+            fontSize: size === "w-28 h-28" ? "2rem" : "1.5rem",
+          }}
+        >
+          {getInitials(friend?.name)}
+        </div>
+      </div>
+      {showStatus && (
+        <span className="absolute bottom-2 right-2 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-lg"></span>
+      )}
+    </div>
+  );
 
   if (showIncomingPopup) {
     return (
@@ -230,13 +269,8 @@ function CallModal({
             Incoming{" "}
             {incomingOffer?.incomingType === "video" ? "Video" : "Audio"} Call
           </h2>
-          <img
-            src={profileImage}
-            alt={friend?.name}
-            className="w-24 h-24 rounded-full object-cover border-4 border-amber-400 shadow-lg mb-4"
-            style={{ background: "#222" }}
-          />
-          <p className="text-lg text-white mb-6">
+          <ProfileAvatar />
+          <p className="text-lg text-white mb-6 mt-4">
             {friend?.name} is calling you...
           </p>
           <div className="flex gap-6">
@@ -284,16 +318,8 @@ function CallModal({
           <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-amber-900/30 rounded-3xl p-8 shadow-2xl border border-amber-500/30 flex flex-col items-center min-w-[350px] max-w-xs w-full relative">
             {type === "audio" ? (
               <div className="flex flex-col items-center w-full">
-                <div className="relative mb-4">
-                  <img
-                    src={profileImage}
-                    alt={friend?.name}
-                    className="w-28 h-28 rounded-full object-cover border-4 border-amber-400 shadow-lg"
-                    style={{ background: "#222" }}
-                  />
-                  <span className="absolute bottom-2 right-2 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-white shadow-lg"></span>
-                </div>
-                <h2 className="text-2xl font-bold text-amber-200 mb-1">
+                <ProfileAvatar size="w-28 h-28" showStatus={true} />
+                <h2 className="text-2xl font-bold text-amber-200 mb-1 mt-4">
                   {friend?.name}
                 </h2>
                 <p className="text-slate-400 text-base mb-6">
@@ -318,7 +344,13 @@ function CallModal({
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth="2"
-                          d="M9 5v14l11-7m-11 7l-4-4m4 4l4-4"
+                          d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
                         />
                       </svg>
                     ) : (
@@ -332,7 +364,7 @@ function CallModal({
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           strokeWidth="2"
-                          d="M9 5v14l11-7-11-7z"
+                          d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
                         />
                       </svg>
                     )}
