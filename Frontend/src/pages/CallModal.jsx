@@ -21,6 +21,7 @@ function CallModal({
     !isCaller && !!incomingOffer
   );
 
+
   useEffect(() => {
     let stream;
 
@@ -198,6 +199,26 @@ function CallModal({
     }
   };
 
+  const BASE_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "";
+
+  const getImageUrl = (imagePath) => {
+  if (!imagePath) return "/default-avatar.png";
+
+  
+  if (imagePath.startsWith("http")) return imagePath;
+
+ 
+  if (!imagePath.startsWith("/")) {
+    imagePath = `/uploads/${imagePath}`;
+  }
+
+  return `${BASE_URL}${imagePath}`;
+};
+
+  const profileImage = friend?.profilePic
+  ? getImageUrl(friend.profilePic)
+  : "/default-avatar.png";
+
   if (showIncomingPopup) {
     return (
       <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
@@ -207,7 +228,7 @@ function CallModal({
             {incomingOffer?.incomingType === "video" ? "Video" : "Audio"} Call
           </h2>
           <img
-            src={friend?.avatar || "/default-avatar.png"}
+            src={profileImage}
             alt={friend?.name}
             className="w-24 h-24 rounded-full object-cover border-4 border-amber-400 shadow-lg mb-4"
             style={{ background: "#222" }}
@@ -262,7 +283,7 @@ function CallModal({
               <div className="flex flex-col items-center w-full">
                 <div className="relative mb-4">
                   <img
-                    src={friend?.avatar || "/default-avatar.png"}
+                    src={profileImage}
                     alt={friend?.name}
                     className="w-28 h-28 rounded-full object-cover border-4 border-amber-400 shadow-lg"
                     style={{ background: "#222" }}
