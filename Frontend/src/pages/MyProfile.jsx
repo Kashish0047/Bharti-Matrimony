@@ -22,6 +22,7 @@ function MyProfile() {
   const [saving, setSaving] = useState(false);
   const [profilePicPreview, setProfilePicPreview] = useState("");
   const [additionalPhotosPreview, setAdditionalPhotosPreview] = useState([]);
+  const [photosToDelete, setPhotosToDelete] = useState([]);
 
   useEffect(() => {
     fetchMyProfile();
@@ -183,16 +184,46 @@ function MyProfile() {
   };
 
   
-  const removeAdditionalPhoto = (index) => {
-    setAdditionalPhotosPreview((prev) => prev.filter((_, i) => i !== index));
+ const removeAdditionalPhoto = (index) => {
+  const photoUrl = additionalPhotosPreview[index];
+  
+ 
+  if (!photoUrl.startsWith('data:image')) {
+    
+    const existingPhotos = profile?.additionalPhotos || [];
+    
+    
+    const matchingIndex = existingPhotos.findIndex(photo => {
+      const fullUrl = photo.startsWith("/uploads/") 
+        ? `${baseURL}${photo}` 
+        : photo;
+      return fullUrl === photoUrl;
+    });
+    
+    if (matchingIndex !== -1) {
+      setPhotosToDelete(prev => [...prev, existingPhotos[matchingIndex]]);
+    }
+  }
 
-    setFormData((prev) => ({
-      ...prev,
-      additionalPhotosFiles: prev.additionalPhotosFiles
-        ? prev.additionalPhotosFiles.filter((_, i) => i !== index)
-        : [],
-    }));
-  };
+  
+  setAdditionalPhotosPreview((prev) => prev.filter((_, i) => i !== index));
+
+  
+  setFormData((prev) => {
+    const newFiles = prev.additionalPhotosFiles || [];
+    
+    const existingCount = (profile?.additionalPhotos || []).length;
+    const fileIndex = index - existingCount;
+    
+    if (fileIndex >= 0 && fileIndex < newFiles.length) {
+      return {
+        ...prev,
+        additionalPhotosFiles: newFiles.filter((_, i) => i !== fileIndex)
+      };
+    }
+    return prev;
+  });
+};
 
   const triggerFileUpload = () => {
     fileInputRef.current?.click();
@@ -284,156 +315,165 @@ function MyProfile() {
     }
   };
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      const token = localStorage.getItem("token");
+ const handleSave = async () => {
+  try {
+    setSaving(true);
+    const token = localStorage.getItem("token");
 
-      if (!token) {
-        toast.error("Please login first");
-        navigate("/login");
+    if (!token) {
+      toast.error("Please login first");
+      navigate("/login");
+      return;
+    }
+
+    console.log("💾 Saving profile...", formData);
+
+    let profilePicUrl = profile?.profilePic;
+    let additionalPhotoUrls = profile?.additionalPhotos || [];
+
+   
+    if (formData.profilePicFile) {
+      try {
+        console.log("📤 Uploading profile picture...");
+        profilePicUrl = await uploadProfilePic(formData.profilePicFile);
+        console.log("✅ Profile picture uploaded:", profilePicUrl);
+        toast.success("Profile picture uploaded successfully!");
+      } catch (error) {
+        console.error("❌ Failed to upload profile picture:", error);
+        toast.error("Failed to upload profile picture");
+        setSaving(false);
         return;
       }
-
-      console.log(" Saving profile...", formData);
-
-      let profilePicUrl = profile?.profilePic;
-      let additionalPhotoUrls = profile?.additionalPhotos || [];
-
-      
-      if (formData.profilePicFile) {
-        try {
-          console.log(" Uploading profile picture...");
-          profilePicUrl = await uploadProfilePic(formData.profilePicFile);
-          console.log("Profile picture uploaded:", profilePicUrl);
-          toast.success("Profile picture uploaded successfully!");
-        } catch (error) {
-          console.error(" Failed to upload profile picture:", error);
-          toast.error("Failed to upload profile picture");
-          setSaving(false);
-          return;
-        }
-      }
+    }
 
     
-      if (
-        formData.additionalPhotosFiles &&
-        formData.additionalPhotosFiles.length > 0
-      ) {
-        try {
-          console.log("📤 Uploading additional photos...");
-          const newPhotoUrls = await uploadAdditionalPhotos(
-            formData.additionalPhotosFiles
-          );
-          additionalPhotoUrls = [...additionalPhotoUrls, ...newPhotoUrls];
-          
-          toast.success("Additional photos uploaded successfully!");
-        } catch (error) {
-          console.error(" Failed to upload additional photos:", error);
-          toast.error("Failed to upload additional photos");
-          setSaving(false);
-          return;
-        }
-      }
+    additionalPhotoUrls = additionalPhotoUrls.filter(
+      photo => !photosToDelete.includes(photo)
+    );
 
-     
-      const updateData = {
-        name: formData.name,
-        dob: formData.dob,
-        birthPlace: formData.birthPlace,
-        gender: formData.gender,
-        timeOfBirth: formData.timeOfBirth,
-        height: formData.height,
-        weight: formData.weight,
-        complexion: formData.complexion,
-        religion: formData.religion,
-        caste: formData.caste,
-        manglik: formData.manglik,
-        education:
-          typeof formData.education === "object"
-            ? formData.education?.degree || ""
-            : formData.education || "",
-        occupation:
-          typeof formData.occupation === "object"
-            ? formData.occupation?.title || ""
-            : formData.occupation || "",
-        monthlyIncome: formData.monthlyIncome,
-        fatherName: formData.fatherName,
-        motherName: formData.motherName,
-        siblings: formData.siblings,
-        preferences: formData.preferences,
-        hobbies:
-          typeof formData.hobbies === "string"
-            ? formData.hobbies.split(", ").filter((h) => h.trim())
-            : Array.isArray(formData.hobbies)
-            ? formData.hobbies
-            : [],
-        profilePic: profilePicUrl,
-        additionalPhotos: additionalPhotoUrls, 
-      };
-
-      console.log("📡 Sending profile update:", updateData);
-
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
-
-      const response = await axios.put(
-        `${API_URL}/profiles/update`,
-        updateData,
-        config
-      );
-
-      console.log("✅ Profile update response:", response.data);
-
-      if (response.data.success) {
-        setProfile(response.data.profile);
-        setFormData(response.data.profile);
-
-
-        const newProfilePic = response.data.profile.profilePic;
-        if (newProfilePic) {
-          const imageUrl = newProfilePic.startsWith("/uploads/")
-            ? `${baseURL}${newProfilePic}`
-            : newProfilePic;
-          setProfilePicPreview(imageUrl);
-        }
-
-        
-        const newAdditionalPhotos =
-          response.data.profile.additionalPhotos || [];
-        const newAdditionalPhotoUrls = newAdditionalPhotos.map((photo) =>
-          photo.startsWith("/uploads/")
-            ? `${baseURL}${photo}`
-            : photo
+    
+    if (
+      formData.additionalPhotosFiles &&
+      formData.additionalPhotosFiles.length > 0
+    ) {
+      try {
+        console.log("📤 Uploading additional photos...");
+        const newPhotoUrls = await uploadAdditionalPhotos(
+          formData.additionalPhotosFiles
         );
-        setAdditionalPhotosPreview(newAdditionalPhotoUrls);
-
-        setEditing(false);
-        toast.success("Profile updated successfully!");
-
-        
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 1500);
-      } else {
-        throw new Error(response.data.message || "Update failed");
+        additionalPhotoUrls = [...additionalPhotoUrls, ...newPhotoUrls];
+        toast.success("Additional photos uploaded successfully!");
+      } catch (error) {
+        console.error("❌ Failed to upload additional photos:", error);
+        toast.error("Failed to upload additional photos");
+        setSaving(false);
+        return;
       }
-    } catch (error) {
-      console.error("❌ Error updating profile:", error);
-
-      if (error.response?.status === 401) {
-        toast.error("Session expired. Please login again.");
-        navigate("/login");
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error("Failed to update profile. Please try again.");
-      }
-    } finally {
-      setSaving(false);
     }
-  };
+
+    
+    const updateData = {
+      name: formData.name,
+      dob: formData.dob,
+      birthPlace: formData.birthPlace,
+      gender: formData.gender,
+      timeOfBirth: formData.timeOfBirth,
+      height: formData.height,
+      weight: formData.weight,
+      complexion: formData.complexion,
+      religion: formData.religion,
+      caste: formData.caste,
+      manglik: formData.manglik,
+      education:
+        typeof formData.education === "object"
+          ? formData.education?.degree || ""
+          : formData.education || "",
+      occupation:
+        typeof formData.occupation === "object"
+          ? formData.occupation?.title || ""
+          : formData.occupation || "",
+      monthlyIncome: formData.monthlyIncome,
+      fatherName: formData.fatherName,
+      motherName: formData.motherName,
+      siblings: formData.siblings,
+      preferences: formData.preferences,
+      hobbies:
+        typeof formData.hobbies === "string"
+          ? formData.hobbies.split(", ").filter((h) => h.trim())
+          : Array.isArray(formData.hobbies)
+          ? formData.hobbies
+          : [],
+      profilePic: profilePicUrl,
+      additionalPhotos: additionalPhotoUrls, 
+    };
+
+    console.log("📡 Sending profile update:", updateData);
+
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
+
+    const response = await axios.put(
+      `${API_URL}/profiles/update`,
+      updateData,
+      config
+    );
+
+    console.log(" Profile update response:", response.data);
+
+    if (response.data.success) {
+      setProfile(response.data.profile);
+      setFormData(response.data.profile);
+
+      
+      const newProfilePic = response.data.profile.profilePic;
+      if (newProfilePic) {
+        const imageUrl = newProfilePic.startsWith("/uploads/")
+          ? `${baseURL}${newProfilePic}`
+          : newProfilePic;
+        setProfilePicPreview(imageUrl);
+      }
+
+      
+      const newAdditionalPhotos = response.data.profile.additionalPhotos || [];
+      const newAdditionalPhotoUrls = newAdditionalPhotos.map((photo) =>
+        photo.startsWith("/uploads/") ? `${baseURL}${photo}` : photo
+      );
+      setAdditionalPhotosPreview(newAdditionalPhotoUrls);
+
+      
+      setPhotosToDelete([]);
+      setFormData(prev => ({
+        ...prev,
+        additionalPhotosFiles: []
+      }));
+
+      setEditing(false);
+      toast.success("Profile updated successfully!");
+
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 1500);
+    } else {
+      throw new Error(response.data.message || "Update failed");
+    }
+  } catch (error) {
+    console.error("❌ Error updating profile:", error);
+
+    if (error.response?.status === 401) {
+      toast.error("Session expired. Please login again.");
+      navigate("/login");
+    } else if (error.response?.data?.message) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error("Failed to update profile. Please try again.");
+    }
+  } finally {
+    setSaving(false);
+  }
+};
+
+
 
   if (loading) {
     return (
@@ -664,6 +704,7 @@ function MyProfile() {
                       onClick={() => {
                         setEditing(false);
                         setFormData(profile);
+                        setPhotosToDelete([]);
                        
                         const profilePic = profile?.profilePic;
                         if (profilePic) {
