@@ -104,14 +104,11 @@ export const deleteUser = async (req, res) => {
     const user = await User.findByIdAndDelete(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
      
-    await Chat.deleteMany({
-      $or: [{ from: userId }, { to: userId }]
-    });
-
-    
-    await FriendRequest.deleteMany({ 
-      $or: [{ from: userId }, { to: userId }]
-    });
+   
+    await Profile.deleteOne({ userId }); 
+    await Payment.deleteMany({ userId }); 
+    await Chat.deleteMany({ $or: [{ from: userId }, { to: userId }] });
+    await FriendRequest.deleteMany({ $or: [{ from: userId }, { to: userId }] });
 
     res.json({ message: "User and related data deleted successfully" });
   } catch (error) {
