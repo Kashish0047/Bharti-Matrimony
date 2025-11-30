@@ -577,14 +577,34 @@ const uploadAdditionalPhotos = async (req, res) => {
 
     console.log("📤 Additional photos upload request");
     console.log("👤 User ID:", userId);
-    console.log("📁 Files:", req.files);
+    console.log("📁 req.files:", req.files);
+    console.log("📁 req.files type:", Array.isArray(req.files));
 
-    if (!req.files || !req.files.additionalPhotos) {
+   
+    let uploadedFiles = [];
+    
+    if (req.files) {
+      
+      if (Array.isArray(req.files)) {
+        uploadedFiles = req.files;
+        console.log("✅ Files received as array");
+      }
+      
+      else if (req.files.additionalPhotos) {
+        uploadedFiles = req.files.additionalPhotos;
+        console.log("✅ Files received as object with additionalPhotos key");
+      }
+    }
+
+    if (!uploadedFiles || uploadedFiles.length === 0) {
+      console.log("❌ No files found in request");
       return res.status(400).json({
         success: false,
         message: "No additional photos uploaded",
       });
     }
+
+    console.log("✅ Files count:", uploadedFiles.length);
 
     const profile = await Profile.findOne({ userId });
 
@@ -595,16 +615,18 @@ const uploadAdditionalPhotos = async (req, res) => {
       });
     }
 
-    
-    const newPhotos = req.files.additionalPhotos.map(
+   
+    const newPhotos = uploadedFiles.map(
       (file) => `/uploads/profiles/${file.filename}`
     );
+
+    console.log("🖼️ New photo URLs:", newPhotos);
 
     
     const existingPhotos = profile.additionalPhotos || [];
     const allPhotos = [...existingPhotos, ...newPhotos];
 
-    
+   
     if (allPhotos.length > 3) {
       profile.additionalPhotos = allPhotos.slice(0, 3);
     } else {
@@ -614,6 +636,7 @@ const uploadAdditionalPhotos = async (req, res) => {
     await profile.save();
 
     console.log("✅ Additional photos updated successfully");
+    console.log("📸 Final photos:", profile.additionalPhotos);
 
     const updatedProfile = await Profile.findOne({ userId }).populate(
       "userId",
@@ -623,7 +646,7 @@ const uploadAdditionalPhotos = async (req, res) => {
     res.json({
       success: true,
       message: "Additional photos uploaded successfully",
-      additionalPhotos: profile.additionalPhotos,
+      additionalPhotos: profile.additionalPhotos, // ✅ Return correct field
       profile: updatedProfile,
     });
   } catch (error) {
