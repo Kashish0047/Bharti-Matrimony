@@ -297,7 +297,7 @@ function MyProfile() {
       };
 
       const response = await axios.post(
-        `${API_URL}/profiles/upload-additional-photos`,
+        `${API_URL}/profiles/upload-additional`,
         formData,
         config
       );
