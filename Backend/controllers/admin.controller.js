@@ -98,7 +98,7 @@ export const getAllUsersWithPlans = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.params.userId;
 
     
     const user = await User.findByIdAndDelete(userId);
