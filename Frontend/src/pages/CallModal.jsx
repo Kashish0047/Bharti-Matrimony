@@ -215,9 +215,12 @@ function CallModal({
   return `${BASE_URL}${imagePath}`;
 };
 
-  const profileImage = friend?.profilePic
-  ? getImageUrl(friend.profilePic)
-  : "/default-avatar.png";
+  const profileImage =
+  friend?.profilePic && getImageUrl(friend.profilePic) !== "/default-avatar.png"
+    ? getImageUrl(friend.profilePic)
+    : (friend?.additionalPhotos?.length > 0
+        ? getImageUrl(friend.additionalPhotos[0])
+        : "/default-avatar.png");
 
   if (showIncomingPopup) {
     return (
