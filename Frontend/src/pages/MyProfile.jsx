@@ -276,44 +276,84 @@ function MyProfile() {
   };
 
   
-  const uploadAdditionalPhotos = async (files) => {
-    try {
-      if (!files || files.length === 0) return [];
-
-      const token = localStorage.getItem("token");
-      const formData = new FormData();
-
-      files.forEach((file) => {
-        formData.append("additionalPhotos", file);
-      });
-
-      console.log("📤 Uploading additional photos:", files.length);
-
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      };
-
-      const response = await axios.post(
-        `${API_URL}/profiles/upload-additional`,
-        formData,
-        config
-      );
-
-      console.log(" Additional photos upload response:", response.data);
-
-      if (response.data.success) {
-        return response.data.additionalPhotos || [];
-      }
-
-      throw new Error(response.data.message || "Upload failed");
-    } catch (error) {
-      console.error(" Additional photos upload error:", error);
-      throw error;
+  // uploadAdditionalPhotos function ko replace karo
+const uploadAdditionalPhotos = async (files) => {
+  try {
+    if (!files || files.length === 0) {
+      console.log("⚠️ No files to upload");
+      return [];
     }
-  };
+
+    const token = localStorage.getItem("token");
+    const formData = new FormData();
+
+    // Files append karte time detailed logging
+    files.forEach((file, index) => {
+      console.log(`📎 File ${index + 1}:`, {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified
+      });
+      formData.append("additionalPhotos", file);
+    });
+
+    // FormData contents verify karo
+    console.log("📦 FormData entries:");
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    console.log("📤 Uploading", files.length, "additional photos");
+    console.log("📡 API URL:", `${API_URL}/profiles/upload-additional`);
+    console.log("🔑 Token:", token ? "Present" : "Missing");
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    };
+
+    const response = await axios.post(
+      `${API_URL}/profiles/upload-additional`,
+      formData,
+      config
+    );
+
+    console.log("✅ Upload success response:", response.data);
+
+    if (response.data.success) {
+      console.log("📸 Returned photo URLs:", response.data.additionalPhotos);
+      return response.data.additionalPhotos || [];
+    }
+
+    throw new Error(response.data.message || "Upload failed");
+  } catch (error) {
+    console.error("❌ Additional photos upload error:", error);
+    
+    // Detailed error info
+    if (error.response) {
+      console.error("━━━━━━ ERROR RESPONSE ━━━━━━");
+      console.error("Status:", error.response.status);
+      console.error("Status Text:", error.response.statusText);
+      console.error("Data:", error.response.data);
+      console.error("Headers:", error.response.headers);
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    } else if (error.request) {
+      console.error("━━━━━━ ERROR REQUEST ━━━━━━");
+      console.error("No response received");
+      console.error("Request:", error.request);
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    } else {
+      console.error("━━━━━━ ERROR MESSAGE ━━━━━━");
+      console.error("Message:", error.message);
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    }
+    
+    throw error;
+  }
+};
 
  const handleSave = async () => {
   try {
