@@ -196,25 +196,52 @@ function CallModal({
   const BASE_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "";
 
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    if (imagePath.startsWith("http")) return imagePath;
-    if (imagePath.startsWith("/uploads/")) {
-      return `${BASE_URL}${imagePath}`;
-    }
-    return `${BASE_URL}/uploads/profiles/${imagePath}`;
-  };
-
-  const getProfileImage = () => {
-    if (friend?.profilePic) {
-      const url = getImageUrl(friend.profilePic);
-      if (url) return url;
-    }
-    if (friend?.additionalPhotos && friend.additionalPhotos.length > 0) {
-      const url = getImageUrl(friend.additionalPhotos[0]);
-      if (url) return url;
-    }
+  console.log("🔍 Processing image path:", imagePath);
+  
+  if (!imagePath) {
+    console.log("❌ No image path provided");
     return null;
-  };
+  }
+  
+  if (imagePath.startsWith("http")) {
+    console.log("✅ Full URL:", imagePath);
+    return imagePath;
+  }
+  
+  if (imagePath.startsWith("/uploads/")) {
+    const finalUrl = `${BASE_URL}${imagePath}`;
+    console.log("✅ Uploads path:", finalUrl);
+    return finalUrl;
+  }
+  
+  const finalUrl = `${BASE_URL}/uploads/profiles/${imagePath}`;
+  console.log("✅ Filename only:", finalUrl);
+  return finalUrl;
+};
+
+const getProfileImage = () => {
+  console.log("🔍 Getting profile image...");
+  console.log("Friend profilePic:", friend?.profilePic);
+  console.log("Friend additionalPhotos:", friend?.additionalPhotos);
+  
+  if (friend?.profilePic) {
+    const url = getImageUrl(friend.profilePic);
+    console.log("✅ Profile pic URL:", url);
+    if (url) return url;
+  }
+  
+  if (friend?.additionalPhotos && friend.additionalPhotos.length > 0) {
+    const url = getImageUrl(friend.additionalPhotos[0]);
+    console.log("✅ Additional photo URL:", url);
+    if (url) return url;
+  }
+  
+  console.log("❌ No image found, returning null");
+  return null;
+};
+
+const profileImage = getProfileImage();
+console.log("🖼️ FINAL PROFILE IMAGE:", profileImage);
 
   const getInitials = (name) => {
     if (!name) return "?";
@@ -226,7 +253,6 @@ function CallModal({
       .slice(0, 2);
   };
 
-  const profileImage = getProfileImage();
 
   // ✅ Profile Image Component with Fallback
   const ProfileAvatar = ({ size = "w-24 h-24", showStatus = false }) => (
