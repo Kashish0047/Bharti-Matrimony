@@ -136,8 +136,8 @@ function MyProfile() {
     const currentPhotos = additionalPhotosPreview.length;
     const newPhotos = files.length;
 
-    if (currentPhotos + newPhotos > 5) {
-      toast.error("You can upload maximum 5 additional photos");
+    if (currentPhotos + newPhotos > 3) {
+      toast.error("You can upload maximum 3 additional photos");
       return;
     }
 
@@ -305,7 +305,7 @@ function MyProfile() {
       console.log(" Additional photos upload response:", response.data);
 
       if (response.data.success) {
-        return response.data.photoUrls || [];
+        return response.data.additionalPhotos || [];
       }
 
       throw new Error(response.data.message || "Upload failed");
@@ -769,7 +769,7 @@ function MyProfile() {
                   </svg>
                   Photo Gallery{" "}
                   {additionalPhotosPreview.length > 0 &&
-                    `(${additionalPhotosPreview.length}/5)`}
+                    `(${additionalPhotosPreview.length}/3)`}
                 </h3>
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
@@ -808,7 +808,7 @@ function MyProfile() {
                   ))}
 
                   
-                  {editing && additionalPhotosPreview.length < 5 && (
+                  {editing && additionalPhotosPreview.length < 3 && (
                     <button
                       onClick={triggerAdditionalPhotosUpload}
                       className="aspect-square rounded-xl bg-white/10 border-2 border-dashed border-white/30 hover:border-amber-500/50 hover:bg-white/20 transition-all duration-300 flex flex-col items-center justify-center text-white/70 hover:text-amber-300"
@@ -843,7 +843,7 @@ function MyProfile() {
 
                 {editing && (
                   <p className="text-slate-400 text-sm mt-2">
-                    💡 You can upload up to 5 additional photos. Each photo
+                    💡 You can upload up to 3 additional photos. Each photo
                     should be less than 5MB.
                   </p>
                 )}
