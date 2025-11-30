@@ -8,6 +8,7 @@ import Footer from "../components/Footer";
 import { FaLock } from "react-icons/fa"; 
 
 const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
+const baseURL = API_URL.replace("/api", "");
 
 function MyProfile() {
   const navigate = useNavigate();
@@ -54,7 +55,6 @@ function MyProfile() {
         setFormData(profileRes.data.profile);
 
         const profilePic = profileRes.data.profile.profilePic;
-        const baseURL = API_URL.replace("/api", "");
         if (profilePic) {
           const imageUrl = profilePic.startsWith("/uploads/")
             ? `${baseURL}${profilePic}`
@@ -68,7 +68,7 @@ function MyProfile() {
         const additionalPhotoUrls = additionalPhotos.map((photo) =>
           photo.startsWith("/uploads/")
             ? `${baseURL}${photo}`
-            : `${baseURL}${photo}`
+            : photo
         );
         setAdditionalPhotosPreview(additionalPhotoUrls);
         console.log("📸 Additional photos:", additionalPhotoUrls);
@@ -390,11 +390,11 @@ function MyProfile() {
         setProfile(response.data.profile);
         setFormData(response.data.profile);
 
-        
+
         const newProfilePic = response.data.profile.profilePic;
         if (newProfilePic) {
           const imageUrl = newProfilePic.startsWith("/uploads/")
-            ? `http://localhost:5000${newProfilePic}`
+            ? `${baseURL}${newProfilePic}`
             : newProfilePic;
           setProfilePicPreview(imageUrl);
         }
@@ -404,8 +404,8 @@ function MyProfile() {
           response.data.profile.additionalPhotos || [];
         const newAdditionalPhotoUrls = newAdditionalPhotos.map((photo) =>
           photo.startsWith("/uploads/")
-            ? `http://localhost:5000${photo}`
-            : `http://localhost:5000/${photo}`
+            ? `${baseURL}${photo}`
+            : photo
         );
         setAdditionalPhotosPreview(newAdditionalPhotoUrls);
 
@@ -519,7 +519,7 @@ function MyProfile() {
                     <img
                       src={
                         profilePicPreview.startsWith("/uploads/")
-                          ? `http://localhost:5000${profilePicPreview}`
+                          ? `${baseURL}${profilePicPreview}`
                           : profilePicPreview
                       }
                       alt="Profile"
@@ -668,7 +668,7 @@ function MyProfile() {
                         const profilePic = profile?.profilePic;
                         if (profilePic) {
                           const imageUrl = profilePic.startsWith("/uploads/")
-                            ? `http://localhost:5000${profilePic}`
+                            ? `${baseURL}${profilePic}`
                             : profilePic;
                           setProfilePicPreview(imageUrl);
                         } else {
@@ -680,8 +680,8 @@ function MyProfile() {
                         const additionalPhotoUrls = additionalPhotos.map(
                           (photo) =>
                             photo.startsWith("/uploads/")
-                              ? `http://localhost:5000${photo}`
-                              : `http://localhost:5000/${photo}`
+                              ? `${baseURL}${photo}`
+                              : `${baseURL}/${photo}`
                         );
                         setAdditionalPhotosPreview(additionalPhotoUrls);
                       }}
