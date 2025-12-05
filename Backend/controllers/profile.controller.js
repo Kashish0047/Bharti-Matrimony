@@ -1,7 +1,7 @@
 import Profile from "../models/profile.model.js";
 import Payment from "../models/payment.model.js";
 import User from "../models/user.model.js";
-import authMiddleware from "../middleware/auth.middleware.js";
+import cloudinary from "../config/cloudinary.js";
 
 const createProfile = async (req, res, next) => {
   try {
@@ -25,9 +25,7 @@ const createProfile = async (req, res, next) => {
       });
     }
 
-    const subscription = await Payment.findOne({
-      userId,
-    });
+    const subscription = await Payment.findOne({ userId });
 
     if (!subscription) {
       return res.status(400).json({
@@ -37,73 +35,38 @@ const createProfile = async (req, res, next) => {
 
     if (subscription.planStatus !== "Active") {
       return res.status(400).json({
-        message:
-          "Your subscription is not active. Please renew to create profile",
+        message: "Your subscription is not active. Please renew to create profile",
       });
     }
 
     const {
-      name,
-      dob,
-      birthPlace,
-      gender,
-      timeOfBirth,
-      height,
-      weight,
-      complexion,
-      religion,
-      education,
-      occupation,
-      monthlyIncome,
-      caste,
-      manglik,
-      fatherName,
-      motherName,
-      siblings,
-      hobbies,
-      preferences,
+      name, dob, birthPlace, gender, timeOfBirth, height, weight,
+      complexion, religion, education, occupation, monthlyIncome,
+      caste, manglik, fatherName, motherName, siblings, hobbies, preferences,
     } = req.body;
 
     if (
-      !name ||
-      !dob ||
-      !birthPlace ||
-      !gender ||
-      !timeOfBirth ||
-      !height ||
-      !weight ||
-      !complexion ||
-      !religion ||
-      !education ||
-      !occupation ||
-      !monthlyIncome ||
-      !caste ||
-      !manglik ||
-      !fatherName ||
-      !motherName ||
-      siblings === undefined ||
-      !hobbies ||
-      !preferences
+      !name || !dob || !birthPlace || !gender || !timeOfBirth || !height || 
+      !weight || !complexion || !religion || !education || !occupation || 
+      !monthlyIncome || !caste || !manglik || !fatherName || !motherName || 
+      siblings === undefined || !hobbies || !preferences
     ) {
       return res.status(400).json({
         message: "Please fill all the fields",
       });
     }
 
-  
+    // ✅ Get Cloudinary URL for profile pic
     let profilePicUrl = null;
     if (req.files && req.files.profilePic && req.files.profilePic[0]) {
-      profilePicUrl = `/uploads/profiles/${req.files.profilePic[0].filename}`;
+      profilePicUrl = req.files.profilePic[0].path; // Cloudinary URL
     }
 
-    
+    // ✅ Get Cloudinary URLs for additional photos
     let additionalPhotosUrls = [];
     if (req.files && req.files.additionalPhotos) {
-      additionalPhotosUrls = req.files.additionalPhotos.map(
-        (file) => `/uploads/profiles/${file.filename}`
-      );
+      additionalPhotosUrls = req.files.additionalPhotos.map(file => file.path);
 
-      
       if (additionalPhotosUrls.length > 3) {
         additionalPhotosUrls = additionalPhotosUrls.slice(0, 3);
       }
@@ -116,25 +79,9 @@ const createProfile = async (req, res, next) => {
       userId,
       profilePic: profilePicUrl,
       additionalPhotos: additionalPhotosUrls, 
-      name,
-      dob,
-      birthPlace,
-      gender,
-      timeOfBirth,
-      height,
-      weight,
-      complexion,
-      religion,
-      education,
-      occupation,
-      monthlyIncome,
-      caste,
-      manglik,
-      fatherName,
-      motherName,
-      siblings,
-      hobbies,
-      preferences,
+      name, dob, birthPlace, gender, timeOfBirth, height, weight,
+      complexion, religion, education, occupation, monthlyIncome,
+      caste, manglik, fatherName, motherName, siblings, hobbies, preferences,
     });
 
     await newProfile.save();
@@ -145,38 +92,6 @@ const createProfile = async (req, res, next) => {
     });
   } catch (error) {
     console.error("Error creating profile:", error);
-    res.status(500).json({
-      message: "Server Error",
-      error: error.message,
-    });
-  }
-};
-
-const getMyProfile = async (req, res) => {
-  try {
-    const userId = req.userId;
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-      });
-    }
-
-    const profile = await Profile.findOne({ userId });
-
-    if (!profile) {
-      return res.status(404).json({
-        message: "Profile not found",
-      });
-    }
-
-    res.status(200).json({
-      message: "Profile fetched successfully",
-      profile,
-    });
-  } catch (error) {
-    console.error("Error fetching profile:", error);
     res.status(500).json({
       message: "Server Error",
       error: error.message,
@@ -202,31 +117,11 @@ const updateProfile = async (req, res) => {
       });
     }
 
-    
     const {
-      name,
-      age,
-      dob,
-      birthPlace,
-      gender,
-      timeOfBirth,
-      height,
-      weight,
-      complexion,
-      education,
-      occupation,
-      monthlyIncome,
-      religion,
-      caste,
-      manglik,
-      fatherName,
-      motherName,
-      siblings,
-      hobbies,
-      preferences,
-      profilePic,
+      name, age, dob, birthPlace, gender, timeOfBirth, height, weight,
+      complexion, education, occupation, monthlyIncome, religion, caste,
+      manglik, fatherName, motherName, siblings, hobbies, preferences, profilePic,
     } = updateData;
-
 
     if (name !== undefined) profile.name = name;
     if (age !== undefined) profile.age = age;
@@ -247,56 +142,50 @@ const updateProfile = async (req, res) => {
     if (preferences !== undefined) profile.preferences = preferences;
     if (profilePic !== undefined) profile.profilePic = profilePic;
 
-    
     if (education !== undefined) {
       console.log("📚 Processing education:", education, typeof education);
-
       if (typeof education === "string") {
         profile.education = education;
       } else if (typeof education === "object" && education !== null) {
-        profile.education =
-          education.degree || education.title || JSON.stringify(education);
+        profile.education = education.degree || education.title || JSON.stringify(education);
       }
     }
 
-      
     if (occupation !== undefined) {
       console.log("💼 Processing occupation:", occupation, typeof occupation);
-
       if (typeof occupation === "string") {
         profile.occupation = occupation;
       } else if (typeof occupation === "object" && occupation !== null) {
-        profile.occupation =
-          occupation.title || occupation.name || JSON.stringify(occupation);
+        profile.occupation = occupation.title || occupation.name || JSON.stringify(occupation);
       }
     }
 
-      
     if (hobbies !== undefined) {
       console.log("🎯 Processing hobbies:", hobbies, typeof hobbies);
-
       if (Array.isArray(hobbies)) {
         profile.hobbies = hobbies.filter((h) => h && h.trim());
       } else if (typeof hobbies === "string") {
-        profile.hobbies = hobbies
-          .split(",")
-          .map((h) => h.trim())
-          .filter((h) => h);
+        profile.hobbies = hobbies.split(",").map((h) => h.trim()).filter((h) => h);
       }
     }
 
-      
+    // ✅ Handle new profile pic upload (Cloudinary)
     if (req.files && req.files.profilePic && req.files.profilePic[0]) {
-      profile.profilePic = `/uploads/profiles/${req.files.profilePic[0].filename}`;
+      // Delete old image from Cloudinary if exists
+      if (profile.profilePic) {
+        try {
+          const publicId = profile.profilePic.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`bharti_matrimony/profiles/${publicId}`);
+        } catch (err) {
+          console.log("Failed to delete old image:", err);
+        }
+      }
+      profile.profilePic = req.files.profilePic[0].path;
     }
 
-    
+    // ✅ Handle additional photos upload (Cloudinary)
     if (req.files && req.files.additionalPhotos) {
-      const newAdditionalPhotos = req.files.additionalPhotos.map(
-        (file) => `/uploads/profiles/${file.filename}`
-      );
-
-        
+      const newAdditionalPhotos = req.files.additionalPhotos.map((file) => file.path);
       const existingPhotos = profile.additionalPhotos || [];
       const allPhotos = [...existingPhotos, ...newAdditionalPhotos];
 
@@ -309,24 +198,10 @@ const updateProfile = async (req, res) => {
       console.log("🖼️ Updated additional photos:", profile.additionalPhotos);
     }
 
-    console.log("💾 Saving profile with data:", {
-      education: profile.education,
-      occupation: profile.occupation,
-      hobbies: profile.hobbies,
-      monthlyIncome: profile.monthlyIncome,
-      manglik: profile.manglik,
-      additionalPhotos: profile.additionalPhotos,
-    });
-
     await profile.save();
-
     console.log("✅ Profile updated successfully");
 
-    
-    const updatedProfile = await Profile.findOne({ userId }).populate(
-      "userId",
-      "name email"
-    );
+    const updatedProfile = await Profile.findOne({ userId }).populate("userId", "name email");
 
     res.json({
       success: true,
@@ -534,16 +409,12 @@ const uploadProfilePic = async (req, res) => {
       });
     }
 
-    const profilePicUrl = `/uploads/profiles/${req.file.filename}`;
+    // ✅ Cloudinary URL from multer
+    const profilePicUrl = req.file.path;
 
     console.log("🖼️ Profile pic URL:", profilePicUrl);
 
-      
-    const profile = await Profile.findOneAndUpdate(
-      { userId },
-      { profilePic: profilePicUrl },
-      { new: true }
-    ).populate("userId", "name email");
+    const profile = await Profile.findOne({ userId });
 
     if (!profile) {
       return res.status(404).json({
@@ -552,13 +423,28 @@ const uploadProfilePic = async (req, res) => {
       });
     }
 
+    // Delete old image from Cloudinary if exists
+    if (profile.profilePic) {
+      try {
+        const publicId = profile.profilePic.split('/').pop().split('.')[0];
+        await cloudinary.uploader.destroy(`bharti_matrimony/profiles/${publicId}`);
+      } catch (err) {
+        console.log("Failed to delete old image:", err);
+      }
+    }
+
+    profile.profilePic = profilePicUrl;
+    await profile.save();
+
+    const updatedProfile = await Profile.findOne({ userId }).populate("userId", "name email");
+
     console.log("✅ Profile pic updated successfully");
 
     res.json({
       success: true,
       message: "Profile picture uploaded successfully",
       profilePicUrl: profilePicUrl,
-      profile: profile,
+      profile: updatedProfile,
     });
   } catch (error) {
     console.error("❌ Profile pic upload error:", error);
@@ -570,7 +456,6 @@ const uploadProfilePic = async (req, res) => {
   }
 };
 
-
 const uploadAdditionalPhotos = async (req, res) => {
   try {
     const userId = req.userId;
@@ -578,21 +463,14 @@ const uploadAdditionalPhotos = async (req, res) => {
     console.log("📤 Additional photos upload request");
     console.log("👤 User ID:", userId);
     console.log("📁 req.files:", req.files);
-    console.log("📁 req.files type:", Array.isArray(req.files));
 
-   
     let uploadedFiles = [];
     
     if (req.files) {
-      
       if (Array.isArray(req.files)) {
         uploadedFiles = req.files;
-        console.log("✅ Files received as array");
-      }
-      
-      else if (req.files.additionalPhotos) {
+      } else if (req.files.additionalPhotos) {
         uploadedFiles = req.files.additionalPhotos;
-        console.log("✅ Files received as object with additionalPhotos key");
       }
     }
 
@@ -615,18 +493,14 @@ const uploadAdditionalPhotos = async (req, res) => {
       });
     }
 
-   
-    const newPhotos = uploadedFiles.map(
-      (file) => `/uploads/profiles/${file.filename}`
-    );
+    // ✅ Get Cloudinary URLs
+    const newPhotos = uploadedFiles.map(file => file.path);
 
     console.log("🖼️ New photo URLs:", newPhotos);
 
-    
     const existingPhotos = profile.additionalPhotos || [];
     const allPhotos = [...existingPhotos, ...newPhotos];
 
-   
     if (allPhotos.length > 3) {
       profile.additionalPhotos = allPhotos.slice(0, 3);
     } else {
@@ -636,17 +510,13 @@ const uploadAdditionalPhotos = async (req, res) => {
     await profile.save();
 
     console.log("✅ Additional photos updated successfully");
-    console.log("📸 Final photos:", profile.additionalPhotos);
 
-    const updatedProfile = await Profile.findOne({ userId }).populate(
-      "userId",
-      "name email"
-    );
+    const updatedProfile = await Profile.findOne({ userId }).populate("userId", "name email");
 
     res.json({
       success: true,
       message: "Additional photos uploaded successfully",
-      additionalPhotos: profile.additionalPhotos, // ✅ Return correct field
+      additionalPhotos: profile.additionalPhotos,
       profile: updatedProfile,
     });
   } catch (error) {
@@ -659,8 +529,7 @@ const uploadAdditionalPhotos = async (req, res) => {
   }
 };
 
-  
-  const deleteAdditionalPhoto = async (req, res) => {
+const deleteAdditionalPhoto = async (req, res) => {
   try {
     const userId = req.userId;
     const { photoIndex } = req.params;
@@ -686,7 +555,15 @@ const uploadAdditionalPhotos = async (req, res) => {
       });
     }
 
-      
+    // ✅ Delete from Cloudinary
+    const photoUrl = profile.additionalPhotos[index];
+    try {
+      const publicId = photoUrl.split('/').pop().split('.')[0];
+      await cloudinary.uploader.destroy(`bharti_matrimony/profiles/${publicId}`);
+    } catch (err) {
+      console.log("Failed to delete from Cloudinary:", err);
+    }
+
     profile.additionalPhotos.splice(index, 1);
     await profile.save();
 

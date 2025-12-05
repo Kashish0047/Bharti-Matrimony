@@ -13,12 +13,13 @@
   "type": "module",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.8.0",
+    "cloudinary": "^1.37.3",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.3",
     "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
     "razorpay": "^2.9.6",
     "socket.io": "^4.8.1"
   }
