@@ -65,12 +65,13 @@ function AdminPanel() {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     setDeletingId(userId);
     try {
-      await axios.delete(`${API_URL}/admin/users/${userId}`, {
+      const res = await axios.delete(`${API_URL}/admin/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(res.data); 
       setUsers(users.filter((u) => u._id !== userId));
     } catch (err) {
-      console.error(err);
+      console.error("Delete failed:", err.response?.data || err.message);
       setError("Failed to delete user");
     }
     setDeletingId(null);
