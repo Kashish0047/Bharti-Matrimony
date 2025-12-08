@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 import Profile from "../models/profile.model.js";
-import Payment from "../models/payment.model.js";
+import Subscription from "../models/payment.model.js"; // Changed Payment to Subscription
 import Visit from "../models/visit.model.js";
 import Chat from "../models/chat.model.js";
 import FriendRequest from "../models/friendRequest.model.js";
@@ -45,7 +45,7 @@ export const getAnalytics = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
     const totalProfiles = await Profile.countDocuments();
-    const totalPayments = await Payment.countDocuments();
+    const totalPayments = await Subscription.countDocuments(); // Changed Payment to Subscription
     let totalVisits = 0;
     try {
       totalVisits = await Visit.countDocuments();
@@ -58,60 +58,80 @@ export const getAnalytics = async (req, res) => {
 
 export const getAllUsersWithPlans = async (req, res) => {
   try {
+    console.log("Fetching all users with plans...");
+    
     const users = await User.find({}).select("name email").lean();
-    const userIds = users.map((u) => u._id.toString());
+    console.log(`Found ${users.length} users`);
+    
+    const userIds = users.map((u) => u._id);
 
     const profiles = await Profile.find({ userId: { $in: userIds } }).lean();
-    const payments = await Payment.find({ userId: { $in: userIds } }).lean();
+    console.log(`Found ${profiles.length} profiles`);
+    
+    const subscriptions = await Subscription.find({ userId: { $in: userIds } }).lean(); // Changed Payment to Subscription
+    console.log(`Found ${subscriptions.length} subscriptions`);
 
     const usersWithDetails = users.map((user) => {
       const profile = profiles.find(
         (p) => String(p.userId) === String(user._id)
       );
-      const payment = payments.find(
-        (p) => String(p.userId) === String(user._id)
+      const subscription = subscriptions.find( // Changed payment to subscription
+        (s) => String(s.userId) === String(user._id)
       );
+      
       return {
         ...user,
         profile,
-        payment:
-          payment !== null
-            ? {
-                planName: payment.planName,
-                amount: payment.amountPaid,
-                startDate: payment.startDate,
-                expiryDate: payment.endDate,
-                planStatus: payment.paymentStatus,
-              }
-            : null,
+        payment: subscription ? { // Kept as 'payment' for frontend compatibility
+          planName: subscription.planName,
+          amount: subscription.amountPaid,
+          startDate: subscription.startDate,
+          expiryDate: subscription.endDate,
+          planStatus: subscription.planStatus, // Subscription status (Active/Expired/Cancelled)
+          paymentStatus: subscription.paymentStatus, // Payment status (Success/Failed/Pending)
+        } : null,
       };
     });
 
+    console.log("Users with details prepared:", usersWithDetails.length);
     res.json({ users: usersWithDetails });
   } catch (err) {
-    console.error("Get all users error:", err);
-    res
-      .status(500)
-      .json({ message: "Failed to fetch users", error: err.message });
+    console.error("❌ Get all users error:", err);
+    res.status(500).json({ 
+      message: "Failed to fetch users", 
+      error: err.message 
+    });
   }
 };
 
 export const deleteUser = async (req, res) => {
   try {
     const userId = req.params.userId;
+    console.log("Deleting user:", userId);
 
-    
     const user = await User.findByIdAndDelete(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
      
-   
+    // Delete all related data
     await Profile.deleteOne({ userId }); 
-    await Payment.deleteMany({ userId }); 
+    await Subscription.deleteMany({ userId }); // Changed Payment to Subscription
     await Chat.deleteMany({ $or: [{ from: userId }, { to: userId }] });
-    await FriendRequest.deleteMany({ $or: [{ from: userId }, { to: userId }] });
+    await FriendRequest.deleteMany({ 
+      $or: [{ from: userId }, { to: userId }] 
+    });
 
-    res.json({ message: "User and related data deleted successfully" });
+    console.log("✅ User deleted successfully");
+    res.json({ 
+      success: true,
+      message: "User and related data deleted successfully" 
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error("❌ Delete user error:", error);
+    res.status(500).json({ 
+      message: "Server error", 
+      error: error.message 
+    });
   }
 };
