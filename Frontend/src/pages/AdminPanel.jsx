@@ -39,7 +39,7 @@ function AdminPanel() {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((res) => setUsers(res.data.users))
-        .catch(() => setError("Failed to fetch users"));
+        .catch((err) => setError("Failed to fetch users" + (err.response?.data || "")));
 
       axios
         .get(`${API_URL}/contact`, {
