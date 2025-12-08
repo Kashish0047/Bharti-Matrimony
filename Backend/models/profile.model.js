@@ -155,7 +155,6 @@ const profileSchema = new mongoose.Schema(
 );
 
 
-profileSchema.index({ userId: 1 });
 profileSchema.index({ gender: 1, isActive: 1 });
 profileSchema.index({ religion: 1, caste: 1 });
 
