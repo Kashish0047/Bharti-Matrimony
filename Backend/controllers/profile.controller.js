@@ -584,6 +584,41 @@ const deleteAdditionalPhoto = async (req, res) => {
   }
 };
 
+const getMyProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    console.log("🔍 Fetching profile for user:", userId);
+
+    const profile = await Profile.findOne({ userId }).populate(
+      "userId",
+      "name email"
+    );
+
+    if (!profile) {
+      console.log("❌ Profile not found for user:", userId);
+      return res.status(404).json({
+        message: "Profile not found",
+        success: false,
+      });
+    }
+
+    console.log("✅ Profile found:", profile.name);
+
+    res.status(200).json({
+      message: "Profile fetched successfully",
+      success: true,
+      profile,
+    });
+  } catch (error) {
+    console.error("❌ Get my profile error:", error);
+    res.status(500).json({
+      message: "Server Error",
+      error: error.message,
+    });
+  }
+};
+
 export {
   createProfile,
   getMyProfile,
