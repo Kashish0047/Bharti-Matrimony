@@ -28,6 +28,25 @@ function MyProfile() {
     fetchMyProfile();
   }, []);
 
+  const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+
+ 
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+
+  
+  const baseURL = API_URL.replace("/api", "");
+
+  if (imagePath.startsWith("/uploads/")) {
+    return `${baseURL}${imagePath}`;
+  }
+
+  
+  return `${baseURL}/uploads/${imagePath}`;
+};
+
   const fetchMyProfile = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -57,19 +76,13 @@ function MyProfile() {
 
         const profilePic = profileRes.data.profile.profilePic;
         if (profilePic) {
-          const imageUrl = profilePic.startsWith("/uploads/")
-            ? `${baseURL}${profilePic}`
-            : profilePic;
-          setProfilePicPreview(imageUrl);
-          console.log("🖼️ Profile pic URL:", imageUrl);
-        }
+      setProfilePicPreview(getImageUrl(profilePic));
+      }
 
         
         const additionalPhotos = profileRes.data.profile.additionalPhotos || [];
         const additionalPhotoUrls = additionalPhotos.map((photo) =>
-          photo.startsWith("/uploads/")
-            ? `${baseURL}${photo}`
-            : photo
+          getImageUrl(photo)
         );
         setAdditionalPhotosPreview(additionalPhotoUrls);
         console.log("📸 Additional photos:", additionalPhotoUrls);
@@ -276,7 +289,7 @@ function MyProfile() {
   };
 
   
-  // uploadAdditionalPhotos function ko replace karo
+  
 const uploadAdditionalPhotos = async (files) => {
   try {
     if (!files || files.length === 0) {
@@ -287,7 +300,7 @@ const uploadAdditionalPhotos = async (files) => {
     const token = localStorage.getItem("token");
     const formData = new FormData();
 
-    // Files append karte time detailed logging
+    
     files.forEach((file, index) => {
       console.log(`📎 File ${index + 1}:`, {
         name: file.name,
@@ -298,7 +311,7 @@ const uploadAdditionalPhotos = async (files) => {
       formData.append("additionalPhotos", file);
     });
 
-    // FormData contents verify karo
+    
     console.log("📦 FormData entries:");
     for (let pair of formData.entries()) {
       console.log(pair[0], pair[1]);
@@ -332,7 +345,7 @@ const uploadAdditionalPhotos = async (files) => {
   } catch (error) {
     console.error("❌ Additional photos upload error:", error);
     
-    // Detailed error info
+    
     if (error.response) {
       console.error("━━━━━━ ERROR RESPONSE ━━━━━━");
       console.error("Status:", error.response.status);
@@ -468,16 +481,13 @@ const uploadAdditionalPhotos = async (files) => {
       
       const newProfilePic = response.data.profile.profilePic;
       if (newProfilePic) {
-        const imageUrl = newProfilePic.startsWith("/uploads/")
-          ? `${baseURL}${newProfilePic}`
-          : newProfilePic;
-        setProfilePicPreview(imageUrl);
+        setProfilePicPreview(getImageUrl(newProfilePic));
       }
 
       
       const newAdditionalPhotos = response.data.profile.additionalPhotos || [];
       const newAdditionalPhotoUrls = newAdditionalPhotos.map((photo) =>
-        photo.startsWith("/uploads/") ? `${baseURL}${photo}` : photo
+        getImageUrl(photo)
       );
       setAdditionalPhotosPreview(newAdditionalPhotoUrls);
 
@@ -598,9 +608,7 @@ const uploadAdditionalPhotos = async (files) => {
                   {profilePicPreview ? (
                     <img
                       src={
-                        profilePicPreview.startsWith("/uploads/")
-                          ? `${baseURL}${profilePicPreview}`
-                          : profilePicPreview
+                         profilePicPreview
                       }
                       alt="Profile"
                       className="w-full h-full object-cover"
@@ -748,10 +756,7 @@ const uploadAdditionalPhotos = async (files) => {
                        
                         const profilePic = profile?.profilePic;
                         if (profilePic) {
-                          const imageUrl = profilePic.startsWith("/uploads/")
-                            ? `${baseURL}${profilePic}`
-                            : profilePic;
-                          setProfilePicPreview(imageUrl);
+                          setProfilePicPreview(getImageUrl(profilePic));
                         } else {
                           setProfilePicPreview("");
                         }
@@ -760,9 +765,7 @@ const uploadAdditionalPhotos = async (files) => {
                           profile?.additionalPhotos || [];
                         const additionalPhotoUrls = additionalPhotos.map(
                           (photo) =>
-                            photo.startsWith("/uploads/")
-                              ? `${baseURL}${photo}`
-                              : `${baseURL}/${photo}`
+                            getImageUrl(photo)
                         );
                         setAdditionalPhotosPreview(additionalPhotoUrls);
                       }}

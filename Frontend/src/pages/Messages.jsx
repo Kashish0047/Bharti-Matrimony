@@ -76,18 +76,17 @@ function Messages() {
     }
   });
 
-
-const getProfileImage = (pic) => {
-  if (!pic) return null;
-
-  const baseURL = API_URL.replace("/api", "");
-
-  if (pic.startsWith("http")) return pic;
-
-  if (pic.startsWith("/uploads/")) return `${baseURL}${pic}`;
-
-  return `${baseURL}/uploads/${pic}`;
-};
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    }
+    const baseURL = API_URL.replace("/api", "");
+    if (imagePath.startsWith("/uploads/")) {
+      return `${baseURL}${imagePath}`;
+    }
+    return `${baseURL}/uploads/${imagePath}`;
+  };
 
   const handleUserClick = (otherUser) => {
     // Always use the userId (not profileId) for chat route
@@ -98,28 +97,27 @@ const getProfileImage = (pic) => {
   };
 
   const handleDeleteChat = async (chatId) => {
-  try {
-    const token = localStorage.getItem("token");
-    const config = { headers: { Authorization: `Bearer ${token}` } };
+    try {
+      const token = localStorage.getItem("token");
+      const config = { headers: { Authorization: `Bearer ${token}` } };
 
-    await axios.delete(`${API_URL}/chat/delete-chat/${chatId}`, config);
+      await axios.delete(`${API_URL}/chat/delete-chat/${chatId}`, config);
 
-    toast.success("Chat deleted!");
+      toast.success("Chat deleted!");
 
-    setChats((prev) => prev.filter((chat) => chat._id !== chatId));
+      setChats((prev) => prev.filter((chat) => chat._id !== chatId));
 
-    if (selectedUser) {
-      setSelectedUser(null);
-      setMessages([]);
+      if (selectedUser) {
+        setSelectedUser(null);
+        setMessages([]);
+      }
+
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error("Error deleting chat:", error);
+      toast.error("Failed to delete chat");
     }
-
-    setShowDeleteConfirm(null);
-  } catch (error) {
-    console.error("Error deleting chat:", error);
-    toast.error("Failed to delete chat");
-  }
-};
-
+  };
 
   return (
     <div className="max-w-3xl mx-auto py-8 min-h-screen bg-slate-900">
@@ -139,8 +137,18 @@ const getProfileImage = (pic) => {
               <div className="w-16 h-16 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-2xl overflow-hidden">
                 {otherUser.profilePic ? (
                   <img
-                    src={getProfileImage(otherUser.profilePic)}
+                    src={getImageUrl(otherUser.profilePic)}
                     alt={otherUser.name}
+                    onError={(e) => {
+                      console.log(
+                        "❌ Profile pic failed to load:",
+                        otherUser.profilePic
+                      );
+                      e.target.style.display = "none";
+                      e.target.parentNode.innerHTML = otherUser.name
+                        ?.charAt(0)
+                        .toUpperCase();
+                    }}
                     className="w-full h-full object-cover rounded-full"
                   />
                 ) : (

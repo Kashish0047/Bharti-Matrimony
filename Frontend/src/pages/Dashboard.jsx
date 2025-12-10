@@ -362,33 +362,29 @@ function Dashboard() {
 
   const getMyProfileImage = (profile) => {
 
-     const baseURL = API_URL.replace("/api", "");
+     if (!profile) return null;
 
-    if (profile?.profilePic) {
-      const url = profile.profilePic.startsWith("/uploads/")
-        ? `${baseURL}${profile.profilePic}`
-        : `${baseURL}/uploads/${profile.profilePic}`;
-      return url;
-    }
+  
+  if (profile.profilePic) {
+    return getImageUrl(profile.profilePic);
+  }
 
-    if (profile?.additionalPhotos && profile.additionalPhotos.length > 0) {
-      const url = profile.additionalPhotos[0].startsWith("/uploads/")
-        ? `${baseURL}${profile.additionalPhotos[0]}`
-        : `${baseURL}/uploads/${profile.additionalPhotos[0]}`;
-      return url;
-    }
+  if (profile.additionalPhotos && profile.additionalPhotos.length > 0) {
+    return getImageUrl(profile.additionalPhotos[0]);
+  }
 
-    return null;
+  return null;
   };
 
   const getImageUrl = (imagePath) => {
     if (!imagePath) return null;
 
-    const baseURL = API_URL.replace("/api", "");
 
-    if (imagePath.startsWith("http")) {
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
       return imagePath;
     }
+
+    const baseURL = API_URL.replace("/api", "");
 
     if (imagePath.startsWith("/uploads/")) {
       return `${baseURL}${imagePath}`;
@@ -684,8 +680,12 @@ function Dashboard() {
                       return profileImage ? (
                         <img
                           src={profileImage}
-                          alt={myProfile?.name}
+                          alt={myProfile?.name || "Profile"}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.log("Image failed to load:", profileImage);
+                            e.target.style.display = "none"
+                          }}
                           style={{ borderRadius: "50%" }}
                         />
                       ) : (

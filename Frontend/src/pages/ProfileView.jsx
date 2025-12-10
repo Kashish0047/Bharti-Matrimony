@@ -203,25 +203,16 @@ function ProfileView() {
 
  
   const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-
-    const baseURL = API_URL.replace("/api", "");
-
-    if (imagePath.startsWith("http")) return imagePath;
-
-
-    if (imagePath.startsWith("/uploads/")) {
-      return `${baseURL}${imagePath}`;
-    }
-
-   
-    if (!imagePath.startsWith("/")) {
-      return `${baseURL}/uploads/${imagePath}`;
-    }
-
-    
-    return `${baseURL}/uploads/${imagePath}`;
-  };
+  if (!imagePath) return null;
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  const baseURL = API_URL.replace("/api", "");
+  if (imagePath.startsWith("/uploads/")) {
+    return `${baseURL}${imagePath}`;
+  }
+  return `${baseURL}/uploads/${imagePath}`;
+};
 
   if (loading) {
     return (
