@@ -64,6 +64,24 @@ function Chat() {
   const fileInputRef = useRef(null);
   const emojiPickerRef = useRef(null);
 
+  const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+ 
+  if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    return imagePath;
+  }
+  
+  
+  const baseURL = API_URL.replace("/api", "");
+  
+  if (imagePath.startsWith("/uploads/")) {
+    return `${baseURL}${imagePath}`;
+  }
+  
+  return `${baseURL}/uploads/${imagePath}`;
+};
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -242,6 +260,7 @@ function Chat() {
           ...friendRes.data.user,
           profileId: friendRes.data.profile?._id || null,
           name: friendRes.data.profile?.name || friendRes.data.user.name,
+          profilePic: friendRes.data.profile?.profilePic || null,
         };
       }
       setSubscription(subRes.data.subscription || null);
@@ -642,8 +661,24 @@ function Chat() {
                   </button>
                   <div className="relative">
                     <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 flex items-center justify-center text-white font-bold text-xl shadow-2xl border-3 border-amber-300/50">
-                      {friend?.name?.charAt(0).toUpperCase() || "?"}
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400/40 to-orange-500/40 blur-lg -z-10 animate-pulse"></div>
+                      {friend?.profilePic ? (
+                        <img
+                           src={getImageUrl(friend.profilePic)}
+                           alt={friend.name}
+                           className="w-full h-full object-cover"
+                           onError={(e) => {
+          
+                           e.target.style.display = 'none';
+                           e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                       ) : null}
+                    <div 
+                     className={`w-full h-full flex items-center justify-center ${friend?.profilePic ? 'hidden' : 'flex'}`}
+                    >
+                    {friend?.name?.charAt(0).toUpperCase() || "?"}
+                    </div>
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-amber-400/40 to-orange-500/40 blur-lg -z-10 animate-pulse"></div>
                     </div>
                     {isOnline && (
                       <div className="absolute -bottom-1 -right-1 z-10">
