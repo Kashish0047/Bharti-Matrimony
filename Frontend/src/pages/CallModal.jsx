@@ -27,42 +27,56 @@ function CallModal({
 
     if (isCaller) {
       (async () => {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: type === "video",
-          audio: true,
-        });
-        if (type === "video") {
-          if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-        } else {
-          if (localAudioRef.current) localAudioRef.current.srcObject = stream;
-        }
-        peerRef.current = new RTCPeerConnection({
-          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-        });
-        stream
-          .getTracks()
-          .forEach((track) => peerRef.current.addTrack(track, stream));
-        peerRef.current.onicecandidate = (event) => {
-          if (event.candidate) {
-            socket.emit("ice-candidate", {
-              to: friend._id,
-              candidate: event.candidate,
-            });
-          }
-        };
-        peerRef.current.ontrack = (event) => {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: type === "video",
+            audio: true,
+          });
           if (type === "video") {
-            if (remoteVideoRef.current)
-              remoteVideoRef.current.srcObject = event.streams[0];
+            if (localVideoRef.current) localVideoRef.current.srcObject = stream;
           } else {
-            if (remoteAudioRef.current)
-              remoteAudioRef.current.srcObject = event.streams[0];
+            if (localAudioRef.current) localAudioRef.current.srcObject = stream;
           }
-        };
-        const offer = await peerRef.current.createOffer();
-        await peerRef.current.setLocalDescription(offer);
-        const fromId = currentUser?._id || currentUser;
-        socket.emit("call-user", { to: friend._id, offer, type, from: fromId });
+          peerRef.current = new RTCPeerConnection({
+            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+          });
+          stream
+            .getTracks()
+            .forEach((track) => peerRef.current.addTrack(track, stream));
+          peerRef.current.onicecandidate = (event) => {
+            if (event.candidate) {
+              const fromId = currentUser?._id || currentUser;
+              socket.emit("ice-candidate", {
+                to: friend._id || friend,
+                candidate: event.candidate,
+                from: fromId
+              });
+            }
+          };
+          peerRef.current.ontrack = (event) => {
+            if (type === "video") {
+              if (remoteVideoRef.current)
+                remoteVideoRef.current.srcObject = event.streams[0];
+            } else {
+              if (remoteAudioRef.current)
+                remoteAudioRef.current.srcObject = event.streams[0];
+            }
+          };
+          const offer = await peerRef.current.createOffer();
+          await peerRef.current.setLocalDescription(offer);
+          const fromId = currentUser?._id || currentUser;
+          socket.emit("call-user", { to: friend._id || friend, offer, type, from: fromId });
+        } catch (error) {
+          console.error("Error accessing media devices:", error);
+          if (error.name === 'NotAllowedError') {
+             toast.error("Microphone/Camera access denied. Please allow permissions.");
+          } else if (error.name === 'NotFoundError') {
+             toast.error("No Microphone/Camera found on your device.");
+          } else {
+             toast.error("Failed to access camera/microphone.");
+          }
+          onClose(); // Close modal on failure
+        }
       })();
     }
 
@@ -82,8 +96,9 @@ function CallModal({
     });
 
     socket.on("ice-candidate", async ({ candidate }) => {
-      if (peerRef.current && candidate) {
+      if (candidate) {
         if (
+          peerRef.current &&
           peerRef.current.remoteDescription &&
           peerRef.current.remoteDescription.type
         ) {
@@ -121,48 +136,61 @@ function CallModal({
   const handleAcceptCall = async () => {
     setShowIncomingPopup(false);
     const { from, offer, incomingType } = incomingOffer;
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: incomingType === "video",
-      audio: true,
-    });
-    if (incomingType === "video") {
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-    } else {
-      if (localAudioRef.current) localAudioRef.current.srcObject = stream;
-    }
-    peerRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
-    stream
-      .getTracks()
-      .forEach((track) => peerRef.current.addTrack(track, stream));
-    peerRef.current.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit("ice-candidate", {
-          to: from,
-          candidate: event.candidate,
-        });
-      }
-    };
-    peerRef.current.ontrack = (event) => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: incomingType === "video",
+        audio: true,
+      });
       if (incomingType === "video") {
-        if (remoteVideoRef.current)
-          remoteVideoRef.current.srcObject = event.streams[0];
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
       } else {
-        if (remoteAudioRef.current)
-          remoteAudioRef.current.srcObject = event.streams[0];
+        if (localAudioRef.current) localAudioRef.current.srcObject = stream;
       }
-    };
-    await peerRef.current.setRemoteDescription(
-      new window.RTCSessionDescription(offer)
-    );
-    const answer = await peerRef.current.createAnswer();
-    await peerRef.current.setLocalDescription(answer);
-    socket.emit("answer-call", { to: from, answer });
-    setCallAccepted(true);
-    while (iceCandidateQueue.current.length > 0) {
-      const queued = iceCandidateQueue.current.shift();
-      await peerRef.current.addIceCandidate(new window.RTCIceCandidate(queued));
+      peerRef.current = new RTCPeerConnection({
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      });
+      stream
+        .getTracks()
+        .forEach((track) => peerRef.current.addTrack(track, stream));
+      peerRef.current.onicecandidate = (event) => {
+        if (event.candidate) {
+          const fromId = currentUser?._id || currentUser;
+          socket.emit("ice-candidate", {
+            to: from,
+            candidate: event.candidate,
+            from: fromId
+          });
+        }
+      };
+      peerRef.current.ontrack = (event) => {
+        if (incomingType === "video") {
+          if (remoteVideoRef.current)
+            remoteVideoRef.current.srcObject = event.streams[0];
+        } else {
+          if (remoteAudioRef.current)
+            remoteAudioRef.current.srcObject = event.streams[0];
+        }
+      };
+      await peerRef.current.setRemoteDescription(
+        new window.RTCSessionDescription(offer)
+      );
+      const answer = await peerRef.current.createAnswer();
+      await peerRef.current.setLocalDescription(answer);
+      const fromId = currentUser?._id || currentUser;
+      socket.emit("answer-call", { to: from, answer, from: fromId });
+      setCallAccepted(true);
+      while (iceCandidateQueue.current.length > 0) {
+        const queued = iceCandidateQueue.current.shift();
+        await peerRef.current.addIceCandidate(new window.RTCIceCandidate(queued));
+      }
+    } catch (error) {
+      console.error("Error accepting call:", error);
+      if (error.name === 'NotAllowedError') {
+         toast.error("Microphone/Camera access denied. Cannot join call.");
+      } else {
+         toast.error("Failed to access camera/microphone to join call.");
+      }
+      onClose();
     }
   };
 
@@ -417,8 +445,8 @@ console.log("🖼️ FINAL PROFILE IMAGE:", profileImage);
                     </svg>
                   </button>
                 </div>
-                <audio ref={remoteAudioRef} autoPlay className="hidden" />
-                <audio ref={localAudioRef} autoPlay muted className="hidden" />
+                <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
+                <audio ref={localAudioRef} autoPlay playsInline muted className="hidden" />
               </div>
             ) : (
               <>
@@ -450,12 +478,14 @@ console.log("🖼️ FINAL PROFILE IMAGE:", profileImage);
                 <video
                   ref={remoteVideoRef}
                   autoPlay
+                  playsInline
                   className="w-64 h-40 rounded-2xl bg-black border border-slate-700 shadow-lg object-cover mb-2"
                   style={{ background: "#222" }}
                 />
                 <video
                   ref={localVideoRef}
                   autoPlay
+                  playsInline
                   muted
                   className="w-24 h-16 rounded-xl border border-amber-500/30 shadow-md object-cover absolute bottom-24 right-8"
                   style={{ background: "#222" }}
