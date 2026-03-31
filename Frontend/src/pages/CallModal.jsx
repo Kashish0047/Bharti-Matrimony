@@ -8,6 +8,7 @@ function CallModal({
   isCaller,
   incomingOffer,
   callDeclined,
+  currentUser,
 }) {
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
@@ -60,7 +61,8 @@ function CallModal({
         };
         const offer = await peerRef.current.createOffer();
         await peerRef.current.setLocalDescription(offer);
-        socket.emit("call-user", { to: friend._id, offer, type });
+        const fromId = currentUser?._id || currentUser;
+        socket.emit("call-user", { to: friend._id, offer, type, from: fromId });
       })();
     }
 

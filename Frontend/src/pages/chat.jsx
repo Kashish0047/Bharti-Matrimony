@@ -600,12 +600,6 @@ function Chat() {
     setCallType(type);
     setIsCaller(true);
     setShowCallModal(true);
-    socket.emit("call-user", {
-      to: friend._id,
-      offer: null,
-      type,
-      from: currentUser._id,
-    });
   };
 
   const endCall = () => {
@@ -1326,6 +1320,7 @@ function Chat() {
           isCaller={isCaller}
           incomingOffer={incomingOffer}
           callDeclined={callDeclined}
+          currentUser={currentUser}
         />
       )}
     </>
