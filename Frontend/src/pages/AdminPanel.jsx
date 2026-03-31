@@ -45,7 +45,7 @@ function AdminPanel() {
         .get(`${API_URL}/contact`, {
           headers: { Authorization: `Bearer ${token}` },
         })
-        .then((res) => setContacts(res.data.contacts || []))
+        .then((res) =>  setContacts(res.data.contacts || []))
         .catch(() => setError("Failed to fetch contact queries"));
     }
   };

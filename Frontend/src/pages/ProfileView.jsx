@@ -506,7 +506,7 @@ function ProfileView() {
           </div>
 
           
-          {profile.additionalPhotos && profile.additionalPhotos.length > 0 && (
+          {isFriend && profile.additionalPhotos && profile.additionalPhotos.length > 0 && (
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-6">
               <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
                 <svg
