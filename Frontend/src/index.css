@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+/* Anti-screenshot, text selection and drag prevention */
+body {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  -webkit-touch-callout: none; /* iOS Safari */
+}
+
+img {
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  pointer-events: none; /* Prevents interaction with images entirely like right-click */
+}
+
+/* Hide content when printing (Ctrl+P, Print to PDF) */
+@media print {
+  body {
+    display: none !important;
+  }
+}

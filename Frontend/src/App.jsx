@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import Home from "./pages/Home";
@@ -34,6 +34,55 @@ function PublicRoute({ children }) {
 }
 
 function App() {
+  useEffect(() => {
+    // Disable right click
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+    };
+
+    // Disable common keyboard shortcuts
+    const handleKeyDown = (e) => {
+      // Prevent PrintScreen (doesn't work on all browsers, but deters some)
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText(''); // Clear clipboard as deterrence
+        e.preventDefault();
+      }
+
+      // Prevent Ctrl+S, Ctrl+P, F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      if (
+        (e.ctrlKey && (e.key === "s" || e.key === "S")) || // Save
+        (e.ctrlKey && (e.key === "p" || e.key === "P")) || // Print
+        e.key === "F12" || // Devtools
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) || // DevTools
+        (e.ctrlKey && (e.key === "U" || e.key === "u")) || // View Source
+        (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) // Mac Screenshot shortcuts (partially catchable)
+      ) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener("contextmenu", handleContextMenu);
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Some screen recording extensions / snipping tools trigger blur when activated
+    // While aggressive, hiding the body when lost focus deters screenshots
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        document.body.style.filter = "blur(10px) grayscale(100%)";
+      } else {
+        document.body.style.filter = "none";
+      }
+    };
+    
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
   return (
     <>
       <Routes>
