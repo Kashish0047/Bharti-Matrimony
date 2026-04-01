@@ -48,21 +48,38 @@ function App() {
         e.preventDefault();
       }
 
+      // Mac Screenshot behavior: Immediately mask the screen if trying to use Cmd+Shift+3/4/5
+      if (e.metaKey && e.shiftKey) {
+        // We do this aggressively for any Cmd+Shift because Mac intercepts keys like "4" early.
+        document.body.style.opacity = '0'; // Mask the screen
+      }
+
       // Prevent Ctrl+S, Ctrl+P, F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+      // Use (e.ctrlKey || e.metaKey) to cover Mac Command key
       if (
-        (e.ctrlKey && (e.key === "s" || e.key === "S")) || // Save
-        (e.ctrlKey && (e.key === "p" || e.key === "P")) || // Print
+        ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) || // Save
+        ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P")) || // Print
         e.key === "F12" || // Devtools
-        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) || // DevTools
-        (e.ctrlKey && (e.key === "U" || e.key === "u")) || // View Source
-        (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) // Mac Screenshot shortcuts (partially catchable)
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c")) || // DevTools
+        ((e.ctrlKey || e.metaKey) && (e.key === "U" || e.key === "u")) // View Source
       ) {
         e.preventDefault();
       }
     };
 
+    const handleKeyUp = (e) => {
+      // Restore screen when keys are released
+      if (!e.metaKey || !e.shiftKey) {
+        document.body.style.opacity = '1';
+      }
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('');
+      }
+    };
+
     window.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
 
     // Some screen recording extensions / snipping tools trigger blur when activated
     // While aggressive, hiding the body when lost focus deters screenshots
@@ -79,6 +96,7 @@ function App() {
     return () => {
       window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
