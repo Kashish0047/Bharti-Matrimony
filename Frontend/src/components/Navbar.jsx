@@ -10,6 +10,7 @@ function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [subscription, setSubscription] = useState(null);
+  const [hasProfile, setHasProfile] = useState(false);
 
   const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -29,10 +30,12 @@ function Navbar() {
   useEffect(() => {
     loadUserData();
     fetchSubscription();
+    fetchUserProfile();
   }, []);
 
   useEffect(() => {
     loadUserData();
+    fetchUserProfile();
   }, [location.pathname]);
 
   useEffect(() => {
@@ -67,6 +70,19 @@ function Navbar() {
       setSubscription(response.data.subscription);
     } catch (error) {
       console.error("Error fetching subscription:", error);
+    }
+  };
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.get(`${API_URL}/profiles/my-profile`, config);
+      setHasProfile(!!response.data.profile);
+    } catch (error) {
+      // 404 means no profile yet — that's fine
+      setHasProfile(false);
     }
   };
 
@@ -209,13 +225,15 @@ function Navbar() {
 
                       {subscription && (
                         <>
-                          <Link
-                            to="/create-profile"
-                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
-                            onClick={() => setDropdownOpen(false)}
-                          >
-                            Create Profile
-                          </Link>
+                          {!hasProfile && (
+                            <Link
+                              to="/create-profile"
+                              className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 transition-all"
+                              onClick={() => setDropdownOpen(false)}
+                            >
+                              Create Profile
+                            </Link>
+                          )}
 
                           <Link
                             to="/messages"
@@ -358,13 +376,15 @@ function Navbar() {
 
                 {subscription && (
                   <>
-                    <Link
-                      to="/create-profile"
-                      className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Create Profile
-                    </Link>
+                    {!hasProfile && (
+                      <Link
+                        to="/create-profile"
+                        className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Create Profile
+                      </Link>
+                    )}
                     <Link
                       to="/messages"
                       className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
