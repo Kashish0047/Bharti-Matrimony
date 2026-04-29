@@ -962,10 +962,10 @@ function CreateProfile() {
   return (
     <>
       <ToastContainer position="top-right" autoClose={3000} />
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-3">
+            <h1 className="text-3xl sm:text-4xl font-black bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent mb-3">
               Create Your Profile
             </h1>
             <p className="text-slate-400">
@@ -999,14 +999,14 @@ function CreateProfile() {
                 </React.Fragment>
               ))}
             </div>
-            <div className="flex justify-between text-xs text-slate-400 mt-2">
-              <span className="w-10 text-center">Basic Info</span>
+            <div className="flex justify-between text-[10px] sm:text-xs text-slate-400 mt-2 px-1">
+              <span className="w-8 sm:w-10 text-center">Basic</span>
               <span className="flex-1 text-center">Physical</span>
               <span className="flex-1 text-center">Professional</span>
-              <span className="w-10 text-center">Family</span>
+              <span className="w-8 sm:w-10 text-center">Family</span>
             </div>
           </div>
-          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-12">
             <form
               onSubmit={
                 currentStep === 4 ? handleSubmit : (e) => e.preventDefault()

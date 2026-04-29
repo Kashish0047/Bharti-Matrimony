@@ -596,25 +596,25 @@ function Dashboard() {
             bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900
             rounded-2xl p-6 border border-slate-700 shadow-xl"
             >
-              <div className="flex items-center w-full md:w-1/3 bg-slate-800 rounded-xl px-4 py-3 shadow">
-                <FaSearch className="text-amber-400 mr-3" />
+              <div className="flex items-center w-full md:w-1/2 lg:w-1/3 bg-slate-800 rounded-xl px-4 py-3 shadow">
+                <FaSearch className="text-amber-400 mr-3 shrink-0" />
                 <input
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search by name, birth place, education, occupation, income..."
-                  className="bg-transparent outline-none text-white w-full text-lg placeholder-slate-400"
+                  placeholder="Search..."
+                  className="bg-transparent outline-none text-white w-full text-base sm:text-lg placeholder-slate-400"
                 />
               </div>
-              <div className="flex flex-wrap gap-3 items-center w-full md:w-2/3">
+              <div className="flex flex-wrap gap-2 sm:gap-3 items-center w-full md:w-1/2 lg:w-2/3">
                 <input
                   type="text"
                   value={filters.birthYear}
                   onChange={(e) =>
                     setFilters({ ...filters, birthYear: e.target.value })
                   }
-                  placeholder="Birth Year"
-                  className="bg-slate-800 px-4 py-3 rounded-xl text-white w-28 shadow"
+                  placeholder="Year"
+                  className="bg-slate-800 px-4 py-2 sm:py-3 rounded-xl text-white w-20 sm:w-28 shadow text-sm"
                 />
                 <input
                   type="text"
@@ -622,8 +622,8 @@ function Dashboard() {
                   onChange={(e) =>
                     setFilters({ ...filters, birthPlace: e.target.value })
                   }
-                  placeholder="Birth Place"
-                  className="bg-slate-800 px-4 py-3 rounded-xl text-white w-32 shadow"
+                  placeholder="Place"
+                  className="bg-slate-800 px-4 py-2 sm:py-3 rounded-xl text-white w-24 sm:w-32 shadow text-sm"
                 />
                 <input
                   type="text"
@@ -631,26 +631,8 @@ function Dashboard() {
                   onChange={(e) =>
                     setFilters({ ...filters, education: e.target.value })
                   }
-                  placeholder="Education"
-                  className="bg-slate-800 px-4 py-3 rounded-xl text-white w-32 shadow"
-                />
-                <input
-                  type="text"
-                  value={filters.occupation}
-                  onChange={(e) =>
-                    setFilters({ ...filters, occupation: e.target.value })
-                  }
-                  placeholder="Occupation"
-                  className="bg-slate-800 px-4 py-3 rounded-xl text-white w-32 shadow"
-                />
-                <input
-                  type="text"
-                  value={filters.income}
-                  onChange={(e) =>
-                    setFilters({ ...filters, income: e.target.value })
-                  }
-                  placeholder="Income"
-                  className="bg-slate-800 px-4 py-3 rounded-xl text-white w-24 shadow"
+                  placeholder="Edu"
+                  className="bg-slate-800 px-4 py-2 sm:py-3 rounded-xl text-white w-24 sm:w-32 shadow text-sm"
                 />
                 <button
                   onClick={() =>
@@ -662,17 +644,17 @@ function Dashboard() {
                       income: "",
                     })
                   }
-                  className="px-4 py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition shadow"
+                  className="px-4 py-2 sm:py-3 bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-xl text-xs sm:text-sm font-semibold hover:bg-red-600 transition shadow"
                 >
-                  Clear Filters
+                  Clear
                 </button>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-1">
-              <div className="bg-gradient-to-br from-slate-900/95 via-amber-900/20 to-orange-900/20 backdrop-blur-xl rounded-3xl p-8 border border-amber-500/30 shadow-2xl sticky top-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
+            <div className="md:col-span-1">
+              <div className="bg-gradient-to-br from-slate-900/95 via-amber-900/20 to-orange-900/20 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-amber-500/30 shadow-2xl md:sticky md:top-24">
                 <div className="text-center mb-8">
                   <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 flex items-center justify-center overflow-hidden mb-4 shadow-lg border-4 border-amber-300/40">
                     {(() => {

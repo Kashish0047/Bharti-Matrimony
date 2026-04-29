@@ -6,12 +6,18 @@ import "react-toastify/dist/ReactToastify.css";
 import Navbar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
 import coupleImage from "../images/matrimony.jpeg";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(false);
+  const [purchasingPlan, setPurchasingPlan] = useState(null);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+  const { scrollY } = useScroll();
+  const heroBgY = useTransform(scrollY, [0, 500], [0, 150]);
+  const heroTextY = useTransform(scrollY, [0, 500], [0, 100]);
+  const heroImageY = useTransform(scrollY, [0, 500], [0, -50]);
 
   const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
 
@@ -157,9 +163,19 @@ export default function Home() {
       return;
     }
 
-    setLoading(true);
+    setPurchasingPlan(plan.name);
 
     try {
+      // Check if user already has a subscription
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const subResponse = await axios.get(`${API_URL}/subscriptions/my-subscription`, config);
+      
+      if (subResponse.data.subscription) {
+        toast.info("You are already a member!");
+        setPurchasingPlan(null);
+        return;
+      }
+
       const planDetails = getCurrentPlanDetails(plan);
 
       const orderResponse = await axios.post(
@@ -205,6 +221,7 @@ export default function Home() {
             );
 
             if (verifyResponse.data.success) {
+              setPurchasingPlan(null);
               toast.success(
                 "Payment successful! Redirecting to create profile..."
               );
@@ -226,7 +243,7 @@ export default function Home() {
         },
         modal: {
           ondismiss: function () {
-            setLoading(false);
+            setPurchasingPlan(null);
             toast.info("Payment cancelled");
           },
         },
@@ -239,7 +256,7 @@ export default function Home() {
       toast.error(
         error.response?.data?.message || "Failed to initiate payment"
       );
-      setLoading(false);
+      setPurchasingPlan(null);
     }
   };
 
@@ -277,15 +294,24 @@ export default function Home() {
         id="hero"
         className="w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white relative overflow-hidden"
       >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40"></div>
-        <div className="max-w-7xl mx-auto px-6 py-28 flex flex-col md:flex-row items-center gap-16 relative z-10">
-          <div className="w-full md:w-1/2 space-y-8">
+        <motion.div 
+          style={{ y: heroBgY }}
+          className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjAzIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40">
+        </motion.div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-28 flex flex-col md:flex-row items-center gap-10 md:gap-16 relative z-10">
+          <motion.div 
+            style={{ y: heroTextY }}
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="w-full md:w-1/2 space-y-8"
+          >
             <div className="inline-block">
               <span className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full text-sm font-semibold text-white shadow-lg">
                 ✨ Trusted by 10,000+ Couples
               </span>
             </div>
-            <h1 className="text-6xl md:text-7xl font-black leading-tight tracking-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight tracking-tight">
               Find Your
               <span className="block bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
                 Perfect Match
@@ -336,231 +362,255 @@ export default function Home() {
                 <div className="text-slate-400">Building happy families</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="w-full md:w-1/2 flex justify-center">
+          <motion.div 
+            style={{ y: heroImageY }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+            className="w-full md:w-1/2 flex justify-center"
+          >
             <div className="relative">
               <div className="absolute -inset-6 bg-gradient-to-r from-amber-500 to-orange-500 rounded-3xl blur-3xl opacity-20"></div>
               <img
                 src={coupleImage}
                 alt="Happy Couple"
-                className="relative h-[550px] w-auto object-cover rounded-3xl shadow-2xl border-4 border-slate-800"
+                className="relative h-[300px] md:h-[550px] w-full md:w-auto object-cover rounded-3xl shadow-2xl border-4 border-slate-800"
               />
             </div>
-          </div>
+          </motion.div>
         </div>
       </header>
 
       <section
         id="packages"
-        className="max-w-7xl mx-auto px-6 py-24 bg-gradient-to-br from-slate-50 to-slate-100"
+        className="relative py-24 overflow-hidden bg-white"
       >
-        <div className="text-center mb-16">
-          <h2 className="text-5xl font-extrabold text-slate-900 mb-4">
-            Choose Your Membership Plan
-          </h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto font-normal">
-            Select the plan that best fits your journey. All plans include
-            secure matchmaking, privacy, and dedicated support.
-          </p>
-        </div>
+        {/* Background Decorations */}
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-amber-100/30 rounded-full blur-[120px] -z-10"></div>
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-orange-100/20 rounded-full blur-[150px] -z-10"></div>
+        
+        <div className="max-w-7xl mx-auto px-6 relative">
+          <div className="text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-block px-4 py-1.5 mb-4 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-sm font-bold tracking-wider uppercase"
+            >
+              💎 Membership Options
+            </motion.div>
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 leading-tight">
+              Choose Your <span className="bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">Perfect Plan</span>
+            </h2>
+            <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium">
+              Find the right path to your forever partner with our transparent and value-packed subscription tiers.
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {plans.map((plan, index) => {
-            const currentPlan = getCurrentPlanDetails(plan);
-            const selectedDuration = selectedDurations[plan.name];
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            {(() => {
+              const planColors = {
+                Basic: "from-slate-500 to-slate-700",
+                Gold: "from-amber-400 to-orange-500",
+                Premium: "from-purple-600 to-indigo-700"
+              };
 
-            return (
-              <article
-                key={index}
-                className={`relative p-8 rounded-2xl border-2 transition-all duration-300 shadow-xl bg-white ${
-                  plan.popular
-                    ? "border-amber-400 ring-2 ring-amber-200 scale-105 z-10"
-                    : "border-slate-200 hover:border-amber-300"
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-5 left-1/2 -translate-x-1/2">
-                    <span className="inline-block px-6 py-2 bg-amber-500 text-white text-xs font-bold rounded-full shadow uppercase tracking-wider">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
+              return plans.map((plan, index) => {
+                const currentPlan = getCurrentPlanDetails(plan);
+                const selectedDuration = selectedDurations[plan.name];
+                const accentColor = plan.name === "Basic" ? "slate" : plan.name === "Gold" ? "amber" : "purple";
 
-                <div className="mb-6 text-center">
-                  <div className="text-2xl font-bold text-slate-800 mb-2">
-                    {plan.badge} Plan
-                  </div>
-                  <div className="flex justify-center gap-2 mb-2">
-                    {Object.keys(plan.pricing).map((duration) => (
-                      <button
-                        key={duration}
-                        onClick={() =>
-                          handleDurationChange(plan.name, duration)
-                        }
-                        className={`px-3 py-1 rounded font-semibold text-sm border transition ${
-                          selectedDuration === duration
-                            ? "bg-amber-500 text-white border-amber-500"
-                            : "bg-slate-100 text-slate-700 border-slate-200 hover:bg-amber-50"
-                        }`}
-                      >
-                        {duration === "1M"
-                          ? "1 Month"
-                          : duration === "3M"
-                          ? "3 Months"
-                          : "6 Months"}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="text-4xl font-extrabold text-slate-900 mb-1">
-                    ₹{currentPlan.price.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-slate-500">
-                    for {currentPlan.duration} days
-                  </div>
-                  {selectedDuration !== "1M" && (
-                    <div className="mt-1">
-                      <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded">
-                        {selectedDuration === "6M" ? "Save 33%" : "Save 15%"}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                return (
+                  <motion.article
+                    key={index}
+                    initial={{ opacity: 0, y: 50 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    whileHover={{ y: -15 }}
+                    transition={{ duration: 0.5, delay: index * 0.15 }}
+                    className={`relative flex flex-col p-8 rounded-[2.5rem] border-2 transition-all duration-500 group overflow-hidden ${
+                      plan.popular
+                        ? "bg-white border-amber-200 shadow-[0_20px_50px_rgba(245,158,11,0.15)] z-10"
+                        : "bg-white/40 backdrop-blur-md border-slate-100 hover:border-slate-200 shadow-xl shadow-slate-200/40"
+                    }`}
+                  >
+                    {/* Accent line at top */}
+                    <div className={`absolute top-0 left-0 w-full h-2 bg-gradient-to-r ${planColors[plan.name]}`}></div>
+                    
+                    {plan.popular && (
+                      <div className="absolute -right-12 top-8 rotate-45 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black py-1 w-40 text-center shadow-lg uppercase tracking-widest">
+                        Best Value
+                      </div>
+                    )}
 
-                <div className="mb-6">
-                  <div className="font-semibold text-slate-700 mb-2">
-                    Features:
-                  </div>
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, i) => (
-                      <li
-                        key={i}
-                        className="flex items-center gap-2 text-slate-700 text-sm"
-                      >
-                        <svg
-                          className="w-4 h-4 text-amber-500"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 00-1.414 0L9 11.586 6.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l7-7a1 1 0 000-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        {feature.replace(/^[^a-zA-Z]+/, "")}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {plan.limitations && (
-                  <div className="mb-6">
-                    <div className="font-semibold text-red-600 mb-2">
-                      Limitations:
-                    </div>
-                    <ul className="space-y-1">
-                      {plan.limitations.map((limitation, i) => (
-                        <li
-                          key={i}
-                          className="flex items-center gap-2 text-red-500 text-xs"
-                        >
-                          <svg
-                            className="w-3 h-3"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M10 18a8 8 0 100-16 8 8 0 000 16zm-2-7a1 1 0 112 0 1 1 0 01-2 0zm1-5a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          {limitation.replace(/^[^a-zA-Z]+/, "")}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                <button
-                  onClick={() => handleBuyPlan(plan)}
-                  disabled={loading || !razorpayLoaded}
-                  className={`w-full py-3 rounded-lg font-bold transition-all duration-300 shadow ${
-                    plan.popular
-                      ? "bg-amber-500 text-white hover:bg-amber-600"
-                      : "bg-slate-800 text-white hover:bg-slate-900"
-                  } ${
-                    loading || !razorpayLoaded
-                      ? "opacity-60 cursor-not-allowed"
-                      : "hover:scale-105"
-                  }`}
-                >
-                  {loading
-                    ? "Processing..."
-                    : !razorpayLoaded
-                    ? "Loading..."
-                    : `Choose ${plan.badge} Plan`}
-                </button>
-              </article>
-            );
-          })}
-        </div>
-
-        <div className="mt-16">
-          <div className="bg-white rounded-2xl p-8 shadow-lg border border-slate-200 max-w-5xl mx-auto">
-            <h3 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-              Pricing Overview
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b-2 border-slate-200">
-                    <th className="pb-4 font-bold text-slate-900">Plan</th>
-                    <th className="pb-4 font-bold text-slate-700 text-center">
-                      1 Month
-                    </th>
-                    <th className="pb-4 font-bold text-slate-700 text-center">
-                      3 Months
-                    </th>
-                    <th className="pb-4 font-bold text-slate-700 text-center">
-                      6 Months
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {plans.map((plan, index) => (
-                    <tr key={index} className="border-b border-slate-100">
-                      <td className="py-4">
-                        <div className="flex items-center gap-3">
-                          <span className="font-bold text-slate-900">
-                            {plan.badge}
+                    <div className="mb-8 text-center">
+                      <div className={`inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-tighter ${
+                        plan.name === "Basic" ? "bg-slate-100 text-slate-600" : 
+                        plan.name === "Gold" ? "bg-amber-100 text-amber-600" : 
+                        "bg-purple-100 text-purple-600"
+                      }`}>
+                        {plan.badge} Member
+                      </div>
+                      
+                      <div className="flex flex-col items-center gap-1 mb-6">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-2xl font-bold text-slate-400">₹</span>
+                          <span className="text-5xl font-black text-slate-900 leading-none">
+                            {currentPlan.price.toLocaleString()}
                           </span>
                         </div>
-                      </td>
-                      <td className="py-4 text-center font-bold text-slate-700">
-                        ₹{plan.pricing["1M"].price.toLocaleString()}
-                      </td>
-                      <td className="py-4 text-center">
-                        <div className="font-bold text-slate-700">
-                          ₹{plan.pricing["3M"].price.toLocaleString()}
+                        <div className="text-sm font-semibold text-slate-400 italic">
+                          for {currentPlan.duration} days
                         </div>
-                        <div className="text-xs text-green-600 font-medium">
-                          Save 15%
+                      </div>
+
+                      <div className="flex justify-center p-1 bg-slate-50 rounded-2xl border border-slate-100 mb-4">
+                        {Object.keys(plan.pricing).map((duration) => (
+                          <button
+                            key={duration}
+                            onClick={() => handleDurationChange(plan.name, duration)}
+                            className={`flex-1 px-3 py-2 rounded-xl font-bold text-xs transition-all ${
+                              selectedDuration === duration
+                                ? `bg-white text-slate-900 shadow-md ring-1 ring-slate-100`
+                                : "text-slate-500 hover:text-slate-800"
+                            }`}
+                          >
+                            {duration}
+                          </button>
+                        ))}
+                      </div>
+
+                      {selectedDuration !== "1M" && (
+                        <div className="animate-bounce">
+                          <span className="inline-block px-3 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-lg shadow-emerald-500/30 uppercase tracking-widest">
+                            🔥 Save {selectedDuration === "6M" ? "33%" : "15%"}
+                          </span>
                         </div>
-                      </td>
-                      <td className="py-4 text-center">
-                        <div className="font-bold text-slate-700">
-                          ₹{plan.pricing["6M"].price.toLocaleString()}
-                        </div>
-                        <div className="text-xs text-green-600 font-medium">
-                          Save 33%
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      )}
+                    </div>
+
+                    <div className="flex-1">
+                      <div className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span className="h-px bg-slate-100 flex-1"></span>
+                        Include Features
+                        <span className="h-px bg-slate-100 flex-1"></span>
+                      </div>
+                      <ul className="space-y-4 mb-8">
+                        {plan.features.map((feature, i) => (
+                          <li
+                            key={i}
+                            className="flex items-start gap-3 group/item"
+                          >
+                            <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-sm bg-${accentColor}-50 text-${accentColor}-600 group-hover/item:scale-110 transition-transform`}>
+                              ✓
+                            </div>
+                            <span className="text-slate-600 font-semibold text-sm leading-tight">
+                              {feature.replace(/^[^a-zA-Z]+/, "")}
+                            </span>
+                          </li>
+                        ))}
+                        {plan.limitations && plan.limitations.map((limitation, i) => (
+                          <li
+                            key={`limit-${i}`}
+                            className="flex items-start gap-3 opacity-40 grayscale"
+                          >
+                            <div className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs border border-slate-200 text-slate-300">
+                              ✕
+                            </div>
+                            <span className="text-slate-400 font-medium text-sm leading-tight line-through">
+                              {limitation.replace(/^[^a-zA-Z]+/, "")}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => handleBuyPlan(plan)}
+                      disabled={!!purchasingPlan || !razorpayLoaded}
+                      className={`relative w-full py-5 rounded-[1.5rem] font-black tracking-widest uppercase text-xs transition-all duration-300 group-hover:scale-[1.02] active:scale-95 shadow-xl ${
+                        plan.popular
+                          ? "bg-slate-900 text-white hover:bg-slate-800 shadow-slate-200"
+                          : "bg-slate-100 text-slate-800 hover:bg-slate-200 shadow-slate-100"
+                      } ${
+                        (purchasingPlan && purchasingPlan !== plan.name) || !razorpayLoaded
+                          ? "opacity-60 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        {purchasingPlan === plan.name ? (
+                          <>
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Securing Payment...
+                          </>
+                        ) : !razorpayLoaded ? (
+                          "Initializing..."
+                        ) : (
+                          <>Select {plan.badge}</>
+                        )}
+                      </span>
+                    </button>
+                  </motion.article>
+                );
+              });
+            })()}
+          </div>
+          
+          {/* Comparison Section (Condensed Table) */}
+          <div className="mt-24 max-w-4xl mx-auto">
+            <div className="bg-slate-50/50 backdrop-blur-xl rounded-[3rem] p-1 border border-slate-100 shadow-sm">
+              <div className="bg-white rounded-[2.8rem] p-8 md:p-12 shadow-inner">
+                <div className="text-center mb-10">
+                  <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Full Pricing Comparison</h3>
+                  <div className="h-1 w-20 bg-amber-400 mx-auto rounded-full"></div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr>
+                        <th className="pb-6 font-black text-slate-400 uppercase tracking-widest text-[10px]">Tier</th>
+                        <th className="pb-6 font-black text-slate-400 uppercase tracking-widest text-[10px] text-center">1 Month</th>
+                        <th className="pb-6 font-black text-slate-400 uppercase tracking-widest text-[10px] text-center">3 Months</th>
+                        <th className="pb-6 font-black text-slate-400 uppercase tracking-widest text-[10px] text-center">6 Months</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {(() => {
+                        const planColors = {
+                          Basic: "from-slate-500 to-slate-700",
+                          Gold: "from-amber-400 to-orange-500",
+                          Premium: "from-purple-600 to-indigo-700"
+                        };
+                        return plans.map((plan, idx) => (
+                          <tr key={idx} className="group hover:bg-slate-50/50 transition-colors">
+                            <td className="py-5 pr-4">
+                              <div className="flex items-center gap-4">
+                                <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${planColors[plan.name]}`}></div>
+                                <span className="font-bold text-slate-800">{plan.badge}</span>
+                              </div>
+                            </td>
+                            <td className="py-5 text-center font-black text-slate-900">₹{plan.pricing["1M"].price.toLocaleString()}</td>
+                            <td className="py-5 text-center font-black text-slate-900">
+                              <div>₹{plan.pricing["3M"].price.toLocaleString()}</div>
+                              <div className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Save 15%</div>
+                            </td>
+                            <td className="py-5 text-center font-black text-slate-900">
+                              <div>₹{plan.pricing["6M"].price.toLocaleString()}</div>
+                              <div className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Save 33%</div>
+                            </td>
+                          </tr>
+                        ));
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -587,8 +637,12 @@ export default function Home() {
             {Array(3)
               .fill()
               .map((_, i) => (
-                <figure
+                <motion.figure
                   key={i}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.5, delay: i * 0.15, ease: "easeOut" }}
                   className="group p-10 bg-white rounded-3xl shadow-lg hover:shadow-2xl hover:-translate-y-3 transition-all duration-300 border border-slate-200"
                 >
                   <div className="flex gap-1 mb-6">
@@ -621,7 +675,7 @@ export default function Home() {
                       </div>
                     </div>
                   </figcaption>
-                </figure>
+                </motion.figure>
               ))}
           </div>
         </div>
@@ -642,7 +696,13 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="relative group overflow-hidden rounded-3xl shadow-xl bg-gradient-to-br from-amber-500 to-orange-500 h-96">
+          <motion.div 
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="relative group overflow-hidden rounded-3xl shadow-xl bg-gradient-to-br from-amber-500 to-orange-500 h-96"
+          >
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative">
@@ -660,9 +720,15 @@ export default function Home() {
               <div className="text-4xl font-black mb-2">10,000+</div>
               <div className="text-lg font-light">Happy Couples</div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="relative group overflow-hidden rounded-3xl shadow-xl bg-gradient-to-br from-slate-900 to-slate-700 h-96">
+          <motion.div 
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+            className="relative group overflow-hidden rounded-3xl shadow-xl bg-gradient-to-br from-slate-900 to-slate-700 h-96"
+          >
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative">
@@ -686,7 +752,7 @@ export default function Home() {
               <div className="text-4xl font-black mb-2">20+ Years</div>
               <div className="text-lg font-light">Trusted Service</div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -704,7 +770,11 @@ export default function Home() {
             </p>
           </div>
 
-          <form
+          <motion.form
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
             className="bg-white p-12 rounded-3xl shadow-2xl space-y-8"
             onSubmit={handleContactSubmit}
           >
@@ -756,7 +826,7 @@ export default function Home() {
             >
               {contactLoading ? "Sending..." : "Send Message →"}
             </button>
-          </form>
+          </motion.form>
         </div>
       </section>
 

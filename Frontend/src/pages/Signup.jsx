@@ -142,7 +142,7 @@ function Signup() {
         theme="light"
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-6xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
           <div className="grid md:grid-cols-2 min-h-[600px]">
             <div className="hidden md:block relative">
@@ -164,12 +164,12 @@ function Signup() {
 
             <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-slate-300 to-transparent"></div>
 
-            <div className="p-12 flex flex-col justify-center">
+            <div className="p-6 sm:p-8 md:p-12 flex flex-col justify-center">
               <div className="text-center mb-8">
-                <h1 className="text-3xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
+                <h1 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
                   Bharti Matrimony
                 </h1>
-                <p className="text-slate-600">Create your account</p>
+                <p className="text-sm sm:text-base text-slate-600">Create your account</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
