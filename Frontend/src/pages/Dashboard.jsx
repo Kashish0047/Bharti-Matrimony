@@ -654,77 +654,98 @@ function Dashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
             <div className="md:col-span-1">
-              <div className="bg-gradient-to-br from-slate-900/95 via-amber-900/20 to-orange-900/20 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-amber-500/30 shadow-2xl md:sticky md:top-24">
-                <div className="text-center mb-8">
-                  <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 flex items-center justify-center overflow-hidden mb-4 shadow-lg border-4 border-amber-300/40">
-                    {(() => {
-                      const profileImage = getMyProfileImage(myProfile);
-                      return profileImage ? (
-                        <img
-                          src={profileImage}
-                          alt={myProfile?.name || "Profile"}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            console.log("Image failed to load:", profileImage);
-                            e.target.style.display = "none"
-                          }}
-                          style={{ borderRadius: "50%" }}
-                        />
-                      ) : (
-                        <FaUserFriends className="w-16 h-16 text-white opacity-80" />
-                      );
-                    })()}
+              <div className="bg-slate-900/60 backdrop-blur-2xl rounded-[2.5rem] p-8 border border-slate-700 shadow-2xl md:sticky md:top-24 relative overflow-hidden group">
+                {/* Decorative background blob */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-3xl group-hover:bg-amber-500/20 transition-all duration-500"></div>
+                
+                <div className="text-center mb-8 relative z-10">
+                  <div className="w-36 h-36 mx-auto rounded-[2rem] bg-gradient-to-tr from-amber-500 to-orange-500 p-1 mb-6 shadow-xl shadow-amber-500/20 rotate-3 group-hover:rotate-0 transition-all duration-300">
+                    <div className="w-full h-full rounded-[1.8rem] overflow-hidden bg-slate-800 flex items-center justify-center -rotate-3 group-hover:rotate-0 transition-all duration-300">
+                      {(() => {
+                        const profileImage = getMyProfileImage(myProfile);
+                        return profileImage ? (
+                          <img
+                            src={profileImage}
+                            alt={myProfile?.name || "Profile"}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.log("Image failed to load:", profileImage);
+                              e.target.style.display = "none"
+                            }}
+                          />
+                        ) : (
+                          <FaUserFriends className="w-16 h-16 text-slate-600" />
+                        );
+                      })()}
+                    </div>
                   </div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-200 via-orange-200 to-amber-300 bg-clip-text text-transparent mb-2">
+                  
+                  <h2 className="text-3xl font-black text-white tracking-tight mb-2">
                     {myProfile?.name}
                   </h2>
                   <span
-                    className={`inline-flex items-center gap-2 px-4 py-2 ${getPlanBadgeColor(
+                    className={`inline-flex items-center gap-1.5 px-4 py-1.5 ${getPlanBadgeColor(
                       subscription?.planName
-                    )} text-white text-sm font-bold rounded-full mb-4 shadow`}
+                    )} text-white text-xs font-black uppercase tracking-widest rounded-full mb-6 shadow-lg`}
                   >
                     {subscription?.planName === "Gold" && (
-                      <FaCrown className="text-yellow-300" />
+                      <FaCrown className="text-yellow-300 text-sm" />
                     )}
                     {subscription?.planName === "Premium" && (
-                      <FaGem className="text-pink-300" />
+                      <FaGem className="text-pink-300 text-sm" />
                     )}
                     {subscription?.planName || "No Plan"}
                   </span>
-                  <div className="space-y-2 text-left text-sm text-slate-300 mt-4">
-                    <p className="flex items-center gap-2">
-                      📍 {myProfile?.birthPlace || "Location N/A"}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      🎓 {myProfile?.education || "Education N/A"}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      💼 {myProfile?.occupation || "Occupation N/A"}
-                    </p>
-                    <p className="flex items-center gap-2">
-                      🕉️ {myProfile?.religion || "Religion N/A"}
-                    </p>
+
+                  <div className="grid grid-cols-2 gap-3 text-left">
+                    <div className="bg-slate-800/50 rounded-2xl p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Location</p>
+                      <p className="text-sm text-slate-200 font-semibold truncate" title={myProfile?.birthPlace || "N/A"}>
+                        {myProfile?.birthPlace || "N/A"}
+                      </p>
+                    </div>
+                    <div className="bg-slate-800/50 rounded-2xl p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Education</p>
+                      <p className="text-sm text-slate-200 font-semibold truncate" title={myProfile?.education || "N/A"}>
+                        {myProfile?.education || "N/A"}
+                      </p>
+                    </div>
+                    <div className="bg-slate-800/50 rounded-2xl p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Profession</p>
+                      <p className="text-sm text-slate-200 font-semibold truncate" title={myProfile?.occupation || "N/A"}>
+                        {myProfile?.occupation || "N/A"}
+                      </p>
+                    </div>
+                    <div className="bg-slate-800/50 rounded-2xl p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Religion</p>
+                      <p className="text-sm text-slate-200 font-semibold truncate" title={myProfile?.religion || "N/A"}>
+                        {myProfile?.religion || "N/A"}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => navigate("/my-profile")}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:shadow-lg transition mb-2"
-                >
-                  Edit Profile
-                </button>
-                <button
-                  onClick={() => navigate("/")}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl hover:shadow-lg transition mb-2"
-                >
-                  Upgrade Plan
-                </button>
-                <button
-                  onClick={() => fetchDashboardData()}
-                  className="w-full px-4 py-3 bg-blue-600/20 text-blue-300 font-semibold rounded-xl hover:bg-blue-600/30 transition mb-2"
-                  title="Refresh Profile Data"
-                >
-                  🔄 Refresh
-                </button>
+
+                <div className="space-y-3 relative z-10">
+                  <button
+                    onClick={() => navigate("/my-profile")}
+                    className="w-full px-4 py-3.5 bg-white text-slate-900 font-black rounded-2xl shadow-lg hover:bg-slate-100 active:scale-95 transition-all"
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    onClick={() => navigate("/")}
+                    className="w-full px-4 py-3.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black rounded-2xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 active:scale-95 transition-all"
+                  >
+                    Upgrade Plan
+                  </button>
+                  <button
+                    onClick={() => fetchDashboardData()}
+                    className="w-full px-4 py-3.5 bg-slate-800 text-slate-300 font-bold rounded-2xl border border-slate-700 hover:bg-slate-700 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    title="Refresh Profile Data"
+                  >
+                    🔄 Refresh Data
+                  </button>
+                </div>
                 {friendRequests.length > 0 && (
                   <div className="mt-8 pt-6 border-t border-amber-500/20">
                     <h3 className="text-white font-bold mb-4">
@@ -853,29 +874,33 @@ function Dashboard() {
                     return (
                       <div
                         key={profile._id}
-                        className="bg-gradient-to-br from-slate-900/90 via-amber-900/10 to-orange-900/10 rounded-3xl overflow-hidden border border-amber-500/20 hover:border-amber-500/50 shadow-2xl transition group"
+                        className="bg-slate-900/40 backdrop-blur-xl rounded-[2.5rem] overflow-hidden border border-slate-700/50 hover:border-amber-500/50 shadow-2xl transition-all duration-300 group hover:-translate-y-1 flex flex-col"
                       >
-                        <div className="relative h-64 bg-gradient-to-br from-slate-700 to-slate-800">
+                        <div className="relative h-60 bg-slate-800 overflow-hidden">
                           {profile.profilePic ? (
                             <img
                               src={getImageUrl(profile.profilePic)}
                               alt={profile.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                              <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                                <span className="text-white text-3xl font-bold">
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                              <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
+                                <span className="text-white text-4xl font-black">
                                   {profile.name?.charAt(0).toUpperCase() || "?"}
                                 </span>
                               </div>
                             </div>
                           )}
+                          
+                          {/* Gradient Overlay for better text readability */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+
                           {areFriends ? (
-                            <div className="absolute top-4 right-4 bg-emerald-500 px-3 py-1.5 rounded-full flex items-center gap-1 shadow-lg">
+                            <div className="absolute top-5 right-5 bg-emerald-500/90 backdrop-blur-md px-4 py-1.5 rounded-full flex items-center gap-2 shadow-lg border border-emerald-400/30">
                               <FaUserFriends className="w-4 h-4 text-white" />
-                              <span className="text-white text-xs font-bold">
-                                Friends
+                              <span className="text-white text-xs font-black uppercase tracking-widest">
+                                Friend
                               </span>
                             </div>
                           ) : (
@@ -884,10 +909,10 @@ function Dashboard() {
                                 handleSendRequest(profile.userId._id)
                               }
                               disabled={requestSent}
-                              className={`absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg transition shadow-lg ${
+                              className={`absolute top-5 right-5 w-12 h-12 rounded-full flex items-center justify-center font-bold text-2xl transition-all shadow-xl backdrop-blur-md border ${
                                 requestSent
-                                  ? "bg-slate-600 text-white cursor-not-allowed"
-                                  : "bg-amber-500 text-white hover:bg-amber-600 hover:scale-110"
+                                  ? "bg-slate-800/80 text-slate-400 border-slate-600 cursor-not-allowed"
+                                  : "bg-amber-500/90 text-white border-amber-400/50 hover:bg-amber-500 hover:scale-110 active:scale-95"
                               }`}
                               title={
                                 requestSent ? "Request Sent" : "Add Friend"
@@ -896,9 +921,9 @@ function Dashboard() {
                               {requestSent ? "✓" : "+"}
                             </button>
                           )}
-                          <div className="absolute top-4 left-4">
+                          <div className="absolute top-5 left-5">
                             <span
-                              className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-bold rounded-full shadow ${getPlanBadgeColor(
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full shadow-lg border border-white/10 backdrop-blur-md ${getPlanBadgeColor(
                                 friendPlan
                               )}`}
                             >
@@ -911,31 +936,41 @@ function Dashboard() {
                               {friendPlan}
                             </span>
                           </div>
-                        </div>
-                        <div className="p-8">
-                          <h3 className="text-xl font-bold bg-gradient-to-r from-amber-200 via-orange-200 to-amber-300 bg-clip-text text-transparent mb-3">
-                            {profile.name}
-                          </h3>
-                          <div className="space-y-2 text-sm text-slate-300 mb-4">
-                            <p className="flex items-center gap-2">
-                              📍 {profile.birthPlace || "Location N/A"}
-                            </p>
-                            <p className="flex items-center gap-2">
-                              🎓 {profile.education || "Education N/A"}
-                            </p>
-                            <p className="flex items-center gap-2">
-                              💼 {profile.occupation || "Occupation N/A"}
-                            </p>
-                            <p className="flex items-center gap-2">
-                              🕉️ {profile.religion || "Religion N/A"}
-                            </p>
+                          
+                          {/* Name over image */}
+                          <div className="absolute bottom-5 left-5 right-5">
+                            <h3 className="text-2xl font-black text-white drop-shadow-md truncate">
+                              {profile.name}
+                            </h3>
                           </div>
-                          <div className="flex gap-2">
+                        </div>
+                        
+                        <div className="p-6 flex-1 flex flex-col">
+                          <div className="grid grid-cols-2 gap-3 mb-6 flex-1">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">Location</span>
+                              <span className="text-sm font-semibold text-slate-200 truncate">{profile.birthPlace || "N/A"}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">Education</span>
+                              <span className="text-sm font-semibold text-slate-200 truncate">{profile.education || "N/A"}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">Profession</span>
+                              <span className="text-sm font-semibold text-slate-200 truncate">{profile.occupation || "N/A"}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-0.5">Religion</span>
+                              <span className="text-sm font-semibold text-slate-200 truncate">{profile.religion || "N/A"}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-3 mt-auto">
                             <button
                               onClick={() =>
                                 navigate(`/profile/${profile._id}`)
                               }
-                              className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-semibold rounded-xl hover:shadow-lg transition"
+                              className="flex-1 px-4 py-3.5 bg-slate-800 text-white font-bold rounded-2xl hover:bg-slate-700 border border-slate-700 active:scale-95 transition-all text-sm"
                             >
                               View Profile
                             </button>
@@ -944,28 +979,30 @@ function Dashboard() {
                                 handleChatClick(profile.userId._id, friendPlan)
                               }
                               disabled={isBasicLimitReached()}
-                              className={`px-4 py-3 rounded-xl font-semibold transition relative ${
+                              className={`flex-1 px-4 py-3.5 rounded-2xl font-bold transition-all text-sm active:scale-95 ${
                                 areFriends && !isBasicLimitReached()
-                                  ? "bg-white/10 text-white hover:bg-white/20"
-                                  : "bg-white/5 text-slate-500 cursor-not-allowed"
+                                  ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40"
+                                  : "bg-slate-800/50 text-slate-500 border border-slate-800 cursor-not-allowed"
                               }`}
                               title={
                                 !areFriends
                                   ? "Add friend to chat"
                                   : isBasicLimitReached()
-                                  ? "You have reached your 5 message limit for Basic plan. Upgrade to continue chatting!"
+                                  ? "Message limit reached (Basic Plan)"
                                   : "Start Chat"
                               }
                             >
-                              💬 Chat
+                              💬 Message
                             </button>
                           </div>
+                          
                           {requestSent && !areFriends && (
-                            <div className="mt-3 flex flex-row items-center justify-center gap-3">
-                              <div className="px-3 py-2 bg-slate-500/20 border border-slate-500/50 rounded-lg text-center">
-                                <p className="text-slate-400 text-sm font-semibold">
-                                  ⏳ Request Pending
-                                </p>
+                            <div className="mt-4 flex flex-row items-center justify-between gap-3 bg-slate-800/30 p-3 rounded-2xl border border-slate-800">
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                                  Pending
+                                </span>
                               </div>
                               <button
                                 onClick={async () => {
@@ -973,25 +1010,17 @@ function Dashboard() {
                                     const token = localStorage.getItem("token");
                                     await axios.delete(
                                       `${API_URL}/friend-requests/cancel/${requestSentObj._id}`,
-                                      {
-                                        headers: {
-                                          Authorization: `Bearer ${token}`,
-                                        },
-                                      }
+                                      { headers: { Authorization: `Bearer ${token}` } }
                                     );
-                                    toast.success("Friend request cancelled!");
+                                    toast.success("Request cancelled!");
                                     fetchDashboardData();
                                   } catch (error) {
-                                    console.error(
-                                      "Error cancelling request:",
-                                      error
-                                    );
                                     toast.error("Failed to cancel request");
                                   }
                                 }}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition"
+                                className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest"
                               >
-                                Cancel Request
+                                Cancel
                               </button>
                             </div>
                           )}
