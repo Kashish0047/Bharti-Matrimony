@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import axios from "axios";
 import { Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
@@ -33,8 +34,24 @@ function PublicRoute({ children }) {
   return children;
 }
 
+const API_URL = import.meta.env.VITE_REACT_APP_API_URL;
+
 function App() {
   useEffect(() => {
+    // Track site visit on initial load
+    const trackVisit = async () => {
+      try {
+        // Use sessionStorage to ensure we only count 1 visit per active session
+        if (!sessionStorage.getItem("hasVisited")) {
+          await axios.get(`${API_URL}/track-visit`);
+          sessionStorage.setItem("hasVisited", "true");
+        }
+      } catch (err) {
+        console.error("Failed to track visit", err);
+      }
+    };
+    trackVisit();
+
     // Disable right click
     const handleContextMenu = (e) => {
       e.preventDefault();
