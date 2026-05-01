@@ -237,6 +237,7 @@ export default function Home() {
         prefill: {
           name: JSON.parse(localStorage.getItem("user"))?.name || "",
           email: JSON.parse(localStorage.getItem("user"))?.email || "",
+          contact: JSON.parse(localStorage.getItem("user"))?.phone || "",
         },
         theme: {
           color: "#f59e0b",
