@@ -168,9 +168,9 @@ export default function Home() {
     try {
       // Check if user already has a subscription
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      const subResponse = await axios.get(`${API_URL}/subscriptions/my-subscription`, config);
+      const subResponse = await axios.get(`${API_URL}/subscriptions/status`, config);
       
-      if (subResponse.data.subscription) {
+      if (subResponse.data.hasSubscription && subResponse.data.isActive) {
         toast.info("You are already a member!");
         setPurchasingPlan(null);
         return;
